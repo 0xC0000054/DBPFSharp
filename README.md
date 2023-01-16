@@ -2,12 +2,12 @@
 
 A C# library that reads and writes SimCity 4 DBPF files.
 
-## Exsmple applications
+## Example applications
 
 The following example application demonstrate how to use the library.
 The applications are located in the _examples_ folder.
 
-### DPBFcreate
+### DBPFcreate
 
 This application creates a new DBPF file and inserts the specified item (optionally compressing it).
 
