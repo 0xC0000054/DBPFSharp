@@ -1,7 +1,7 @@
 ﻿// Copyright (c) 2023 Nicholas Hayes
 // SPDX-License-Identifier: MIT
 //
-// Portions of this file have bee adapted from zlib version 1.2.3
+// Portions of this file have been adapted from zlib version 1.2.3
 /*
 zlib.h -- interface of the 'zlib' general purpose compression library
 version 1.2.3, July 18th, 2005
