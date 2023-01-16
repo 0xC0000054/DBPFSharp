@@ -9,7 +9,7 @@ The applications are located in the _examples_ folder.
 
 ### DPBFcreate
 
-This application crates a new DBPF file and inserts the specified item (optionally compressing it).
+This application creates a new DBPF file and inserts the specified item (optionally compressing it).
 
 ### DBPFextract
 
