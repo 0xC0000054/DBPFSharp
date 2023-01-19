@@ -21,7 +21,11 @@ namespace DBPFSharp
             this.entries = new List<DBPFIndexEntry>(count);
         }
 
-        public DBPFIndexEntry this[int index] { get => ((IList<DBPFIndexEntry>)this.entries)[index]; set => ((IList<DBPFIndexEntry>)this.entries)[index] = value; }
+        public DBPFIndexEntry this[int index]
+        {
+            get => this.entries[index];
+            set => this.entries[index] = value;
+        }
 
         public int Count => this.entries.Count;
 
