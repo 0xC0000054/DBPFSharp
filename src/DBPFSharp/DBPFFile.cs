@@ -229,7 +229,7 @@ namespace DBPFSharp
             if (entry is null)
             {
                 this.stream!.Seek(index.Location, SeekOrigin.Begin);
-                byte[] data = new byte[checked((int)index.FileSize)];
+                byte[] data = GC.AllocateUninitializedArray<byte>(checked((int)index.FileSize));
 
                 stream.ReadExactly(data, 0, data.Length);
 

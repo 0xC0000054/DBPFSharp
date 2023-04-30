@@ -55,7 +55,7 @@ namespace DBPFSharp
             }
             else
             {
-                bytes = new byte[this.rawData.Length];
+                bytes = GC.AllocateUninitializedArray<byte>(this.rawData.Length);
                 this.rawData.CopyTo(bytes, 0);
             }
 
