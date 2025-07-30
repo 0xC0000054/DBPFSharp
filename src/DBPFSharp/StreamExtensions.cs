@@ -26,27 +26,6 @@ namespace DBPFSharp
             return BinaryPrimitives.ReadUInt32LittleEndian(bytes);
         }
 
-#if !NET7_0_OR_GREATER
-        public static void ReadExactly(this Stream stream, byte[] bytes, int offset, int count) => stream.ReadExactly(new Span<byte>(bytes, offset, count));
-
-        public static void ReadExactly(this Stream stream, Span<byte> bytes)
-        {
-            Span<byte> span = bytes;
-
-            while (span.Length > 0)
-            {
-                int bytesRead = stream.Read(span);
-
-                if (bytesRead == 0)
-                {
-                    throw new EndOfStreamException();
-                }
-
-                span = span.Slice(bytesRead);
-            }
-        }
-#endif
-
         /// <summary>
         /// Writes an unsigned 16-bit integer to the stream in little endian byte order.
         /// </summary>
