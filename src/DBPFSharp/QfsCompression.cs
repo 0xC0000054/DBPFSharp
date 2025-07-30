@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023 Nicholas Hayes
+﻿// Copyright (c) 2023, 2025 Nicholas Hayes
 // SPDX-License-Identifier: MIT
 //
 // Portions of this file have been adapted from zlib version 1.2.3
