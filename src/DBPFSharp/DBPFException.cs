@@ -27,16 +27,13 @@ namespace DBPFSharp
         public DBPFException(string message) : base(message)
         {
         }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="DBPFException"/> class.
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="inner">The inner exception.</param>
         public DBPFException(string message, Exception inner) : base(message, inner)
-        {
-        }
-
-        private DBPFException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }
     }
