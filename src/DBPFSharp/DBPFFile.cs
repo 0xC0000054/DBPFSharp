@@ -159,14 +159,29 @@ namespace DBPFSharp
         /// <summary>
         /// Add an entry to the file.
         /// </summary>
-        /// <param name="type">he TGI group id of the file entry.</param>
+        /// <param name="tgi">The TGI group id of the file entry.</param>
+        /// <param name="data">The item data.</param>
+        /// <param name="compress">
+        /// <see langword="true"/> if the data should be compressed; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been closed.</exception>
+        public void Add(TGI tgi, byte[] data, bool compress)
+        {
+            Add(tgi.Type, tgi.Group, tgi.Instance, data, compress);
+        }
+
+        /// <summary>
+        /// Add an entry to the file.
+        /// </summary>
+        /// <param name="type">The TGI type id of the file entry.</param>
         /// <param name="group">The TGI group id of the file entry.</param>
         /// <param name="instance">The TGI instance id of the file entry.</param>
         /// <param name="data">The item data.</param>
         /// <param name="compress">
         /// <see langword="true"/> if the data should be compressed; otherwise, <see langword="false"/>.
         /// </param>
-        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">The method is called after the file has been closed.</exception>
         public void Add(uint type, uint group, uint instance, byte[] data, bool compress)
         {
@@ -176,14 +191,29 @@ namespace DBPFSharp
         /// <summary>
         /// Add an entry to the file, or updates an existing entry.
         /// </summary>
-        /// <param name="type">he TGI group id of the file entry.</param>
+        /// <param name="tgi">The TGI of the file entry.</param>
+        /// <param name="data">The item data.</param>
+        /// <param name="compress">
+        /// <see langword="true"/> if the data should be compressed; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been closed.</exception>
+        public void AddOrUpdate(TGI tgi, byte[] data, bool compress)
+        {
+            AddOrUpdate(tgi.Type, tgi.Group, tgi.Instance, data, compress);
+        }
+
+        /// <summary>
+        /// Add an entry to the file, or updates an existing entry.
+        /// </summary>
+        /// <param name="type">The TGI type id of the file entry.</param>
         /// <param name="group">The TGI group id of the file entry.</param>
         /// <param name="instance">The TGI instance id of the file entry.</param>
         /// <param name="data">The item data.</param>
         /// <param name="compress">
         /// <see langword="true"/> if the data should be compressed; otherwise, <see langword="false"/>.
         /// </param>
-        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
         /// <exception cref="ObjectDisposedException">The method is called after the file has been closed.</exception>
         public void AddOrUpdate(uint type, uint group, uint instance, byte[] data, bool compress)
         {
@@ -234,23 +264,44 @@ namespace DBPFSharp
         /// <summary>
         /// Loads an entry from the file.
         /// </summary>
+        /// <param name="indexEntry">The index entry to load.</param>
+        /// <returns>The loaded file entry.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="indexEntry"/> is null.</exception>
+        /// <exception cref="DBPFException">The specified entry does not exist in the file.</exception>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been disposed.</exception>
+        public DBPFEntry GetEntry(DBPFIndexEntry indexEntry)
+        {
+            ArgumentNullException.ThrowIfNull(indexEntry, nameof(indexEntry));
+
+            return GetEntry(indexEntry.Type, indexEntry.Group, indexEntry.Instance);
+        }
+
+        /// <summary>
+        /// Loads an entry from the file.
+        /// </summary>
+        /// <param name="tgi">The TGI to load.</param>
+        /// <returns>The loaded file entry.</returns>
+        /// <exception cref="DBPFException">The specified entry does not exist in the file.</exception>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been disposed.</exception>
+        public DBPFEntry GetEntry(TGI tgi)
+        {
+            return GetEntry(tgi.Type, tgi.Group, tgi.Instance);
+        }
+
+        /// <summary>
+        /// Loads an entry from the file.
+        /// </summary>
         /// <param name="type">The TGI type id to load.</param>
         /// <param name="group">The TGI group id to load.</param>
         /// <param name="instance">The TGI instance id to load.</param>
         /// <returns>The loaded file entry.</returns>
-        /// <exception cref="DBPFException">The specified entry does not exist in the file</exception>
+        /// <exception cref="DBPFException">The specified entry does not exist in the file.</exception>
         /// <exception cref="ObjectDisposedException">The method is called after the file has been disposed.</exception>
         public DBPFEntry GetEntry(uint type, uint group, uint instance)
         {
             VerifyNotDisposed();
 
-            DBPFIndexEntry? index = this.indices.Find(type, group, instance);
-
-            if (index is null)
-            {
-                throw new DBPFException(Resources.SpecifiedIndexDoesNotExist);
-            }
-
+            DBPFIndexEntry index = this.indices.Find(type, group, instance) ?? throw new DBPFException(Resources.SpecifiedIndexDoesNotExist);
             DBPFEntry? entry = index.Entry;
 
             if (entry is null)
@@ -271,6 +322,29 @@ namespace DBPFSharp
             }
 
             return entry;
+        }
+
+        /// <summary>
+        /// Removes the specified file from the file
+        /// </summary>
+        /// <param name="indexEntry">The index entry to remove.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="indexEntry"/> is null.</exception>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been disposed.</exception>
+        public void Remove(DBPFIndexEntry indexEntry)
+        {
+            ArgumentNullException.ThrowIfNull(indexEntry, nameof(indexEntry));
+
+            Remove(indexEntry.Type, indexEntry.Group, indexEntry.Instance);
+        }
+
+        /// <summary>
+        /// Removes the specified file from the file
+        /// </summary>
+        /// <param name="tgi">The TGI to remove.</param>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been disposed.</exception>
+        public void Remove(TGI tgi)
+        {
+            Remove(tgi.Type, tgi.Group, tgi.Instance);
         }
 
         /// <summary>
@@ -466,6 +540,22 @@ namespace DBPFSharp
                 // Open the new file to prevent a NullRefrenceException if GetEntry is called.
                 this.stream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             }
+        }
+
+        /// <summary>
+        /// Updates an existing entry.
+        /// </summary>
+        /// <param name="tgi">The TGI of the file entry.</param>
+        /// <param name="data">The item data.</param>
+        /// <param name="compress">
+        /// <see langword="true"/> if the data should be compressed; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
+        /// <exception cref="DBPFException">The specified entry does not exist in the file.</exception>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been closed.</exception>
+        public void Update(TGI tgi, byte[] data, bool compress)
+        {
+            Update(tgi.Type, tgi.Group, tgi.Instance, data, compress);
         }
 
         /// <summary>
