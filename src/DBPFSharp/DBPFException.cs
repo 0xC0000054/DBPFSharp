@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 using System;
-using System.Runtime.Serialization;
 
 namespace DBPFSharp
 {
