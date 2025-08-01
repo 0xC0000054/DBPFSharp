@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E5D03503-97F7-4CE3-B647-8DACCF3981CB}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		IgnoredWords.dic = IgnoredWords.dic
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBPFextract", "examples\DBPFExtract\DBPFextract.csproj", "{77BF1BCB-A310-4459-9108-798720C3E157}"
