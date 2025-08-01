@@ -64,10 +64,7 @@ namespace DBPFSharp
         /// <exception cref="ArgumentNullException"><paramref name="fileItem"/> is null.</exception>
         internal DBPFIndexEntry(uint type, uint group, uint instance, DBPFEntry fileItem)
         {
-            if (fileItem == null)
-            {
-                throw new ArgumentNullException(nameof(fileItem));
-            }
+            ArgumentNullException.ThrowIfNull(fileItem);
 
             this.Type = type;
             this.Group = group;
@@ -77,6 +74,11 @@ namespace DBPFSharp
             this.IndexState = DatIndexState.New;
             this.Entry = fileItem;
         }
+
+        /// <summary>
+        /// Gets the TGI of the index.
+        /// </summary>
+        public TGI TGI => new(this.Type, this.Group, this.Instance);
 
         /// <summary>
         /// Gets the type id of the index.
