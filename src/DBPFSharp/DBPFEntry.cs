@@ -11,33 +11,75 @@ namespace DBPFSharp
     /// </summary>
     public sealed class DBPFEntry
     {
-        private readonly byte[] rawData;
+        private readonly byte[]? compressedData;
+        private byte[]? uncompressedData;
+        private readonly bool shouldBeCompressed;
 
-        /// <summary>
-        /// Initializes a new instance of the Entry class with the specified data
-        /// </summary>
-        /// <param name="data">The data.</param>
-        /// <param name="isCompressed">
-        /// <see langword="true"/> if the data is isCompressed; otherwise, <see langword="false"/>.
-        /// </param>
-        /// <exception cref="ArgumentNullException">The data is null.</exception>
-        internal DBPFEntry(byte[] data, bool isCompressed)
+        private DBPFEntry(byte[]? compressedData, byte[]? uncompressedData, bool shouldBeCompressed = false)
         {
-            ArgumentNullException.ThrowIfNull(data);
+            if (compressedData != null)
+            {
+                if (uncompressedData != null)
+                {
+                    throw new ArgumentException($"One of {nameof(compressedData)} or {nameof(uncompressedData)} must be null.");
+                }
 
-            rawData = data;
-            IsCompressed = isCompressed;
+                this.IsCompressed = true;
+                this.shouldBeCompressed = false;
+            }
+            else
+            {
+                if (uncompressedData is null)
+                {
+                    throw new ArgumentException($"Both {nameof(compressedData)} and {nameof(uncompressedData)} cannot be null.");
+                }
+
+                this.IsCompressed = false;
+                this.shouldBeCompressed = shouldBeCompressed;
+            }
+
+            this.compressedData = compressedData;
+            this.uncompressedData = uncompressedData;
         }
 
         /// <summary>
-        /// Gets a value indicating whether this instance is isCompressed.
+        /// Creates a <see cref="DBPFEntry" /> from compressed data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <returns>A DBPFEntry.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
+        internal static DBPFEntry FromCompressedData(byte[] data)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+
+            return new DBPFEntry(compressedData: data, uncompressedData: null);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="DBPFEntry" /> from uncompressed data.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <param name="shouldBeCompressed">
+        /// <see langword="true"/> if the data should be compressed when saving; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <returns>A DBPFEntry.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
+        internal static DBPFEntry FromUncompressedData(byte[] data, bool shouldBeCompressed = false)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+
+            return new DBPFEntry(compressedData: null, uncompressedData: data, shouldBeCompressed);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is is compressed.
         /// </summary>
         /// <value>
-        ///   <see langword="true"/> if this instance is isCompressed; otherwise, <see langword="false"/>.
+        ///   <see langword="true"/> if this instance is compressed; otherwise, <see langword="false"/>.
         /// </value>
-        public bool IsCompressed { get; internal set; }
+        public bool IsCompressed { get; }
 
-        internal uint RawDataLength => (uint)this.rawData.Length;
+        internal uint RawDataLength => (uint)(this.uncompressedData?.Length ?? 0);
 
         /// <summary>
         /// Gets the uncompressed data.
@@ -47,53 +89,72 @@ namespace DBPFSharp
         /// </returns>
         public byte[] GetUncompressedData()
         {
-            byte[] bytes;
+            if (this.uncompressedData is null)
+            {
+                if (this.compressedData is null)
+                {
+                    throw new InvalidOperationException("Both the compressed and uncompressed data are null.");
+                }
 
-            if (IsCompressed)
-            {
-                bytes = QfsCompression.Decompress(this.rawData);
+                this.uncompressedData = QfsCompression.Decompress(this.compressedData);
             }
-            else
-            {
-                bytes = GC.AllocateUninitializedArray<byte>(this.rawData.Length);
-                this.rawData.CopyTo(bytes, 0);
-            }
+
+            byte[] bytes = GC.AllocateUninitializedArray<byte>(this.uncompressedData!.Length);
+            this.uncompressedData.CopyTo(bytes, 0);
 
             return bytes;
         }
 
-        internal uint Save(Stream stream)
+        internal (uint bytesWritten, bool isCompressed) Save(Stream stream)
         {
             uint bytesWritten;
+            bool isCompressed;
 
             if (IsCompressed)
             {
-                byte[]? compressedData = QfsCompression.Compress(this.rawData, prefixLength: true);
-
-                if (compressedData != null)
+                if (this.compressedData is null)
                 {
-                    stream.Write(compressedData, 0, compressedData.Length);
-
-                    bytesWritten = (uint)compressedData.Length;
+                    throw new InvalidOperationException($"{nameof(IsCompressed)} is true when the compressed data is null.");
                 }
-                else
-                {
-                    // The data could not be isCompressed.
-                    IsCompressed = false;
 
-                    stream.Write(rawData, 0, rawData.Length);
-
-                    bytesWritten = (uint)rawData.Length;
-                }
+                stream.Write(this.compressedData, 0, this.compressedData.Length);
+                bytesWritten = (uint)this.compressedData.Length;
+                isCompressed = true;
             }
             else
             {
-                stream.Write(rawData, 0, rawData.Length);
+                if (this.uncompressedData is null)
+                {
+                    throw new InvalidOperationException($"{nameof(IsCompressed)} is false when the uncompressed data is null.");
+                }
 
-                bytesWritten = (uint)rawData.Length;
+                if (shouldBeCompressed)
+                {
+                    byte[]? data = QfsCompression.Compress(this.uncompressedData, prefixLength: true);
+
+                    if (data != null)
+                    {
+                        stream.Write(data, 0, data.Length);
+                        bytesWritten = (uint)data.Length;
+                        isCompressed = true;
+                    }
+                    else
+                    {
+                        // The data could not be compressed.
+                        stream.Write(this.uncompressedData!, 0, this.uncompressedData!.Length);
+                        bytesWritten = (uint)this.uncompressedData!.Length;
+                        isCompressed = false;
+                    }
+                }
+                else
+                {
+                    stream.Write(this.uncompressedData!, 0, this.uncompressedData!.Length);
+                    bytesWritten = (uint)this.uncompressedData.Length;
+                    isCompressed = false;
+                }
             }
 
-            return bytesWritten;
+            return (bytesWritten, isCompressed);
         }
     }
 }

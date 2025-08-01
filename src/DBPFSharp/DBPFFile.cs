@@ -190,7 +190,7 @@ namespace DBPFSharp
             ArgumentNullException.ThrowIfNull(data);
             VerifyNotDisposed();
 
-            DBPFEntry item = new(data, compress);
+            DBPFEntry item = DBPFEntry.FromUncompressedData(data, compress);
 
             DBPFIndexEntry? index = this.indices.Find(type, group, instance);
 
@@ -260,9 +260,14 @@ namespace DBPFSharp
 
                 stream.ReadExactly(data, 0, data.Length);
 
-                bool compressed = this.compressionDirectory.Contains(index);
-
-                entry = new DBPFEntry(data, compressed);
+                if (this.compressionDirectory.Contains(index))
+                {
+                    entry = DBPFEntry.FromCompressedData(data);
+                }
+                else
+                {
+                    entry = DBPFEntry.FromUncompressedData(data);
+                }
             }
 
             return entry;
@@ -354,8 +359,9 @@ namespace DBPFSharp
                             DBPFEntry entry = index.Entry!;
 
                             location = output.Position;
-                            size = entry.Save(output);
-                            if (entry.IsCompressed)
+                            (size, bool entryCompressed) = entry.Save(output);
+
+                            if (entryCompressed)
                             {
                                 compDirs.Add(new CompressionDirectoryEntry(index.Type, index.Group, index.Instance, entry.RawDataLength));
                             }
@@ -482,7 +488,7 @@ namespace DBPFSharp
 
             DBPFIndexEntry index = this.indices.Find(type, group, instance) ?? throw new DBPFException(Resources.SpecifiedIndexDoesNotExist);
 
-            index.Entry = new DBPFEntry(data, compress);
+            index.Entry = DBPFEntry.FromUncompressedData(data, compress);
             index.IndexState = DatIndexState.Modified;
         }
 
