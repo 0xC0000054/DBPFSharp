@@ -170,12 +170,39 @@ namespace DBPFSharp
         /// <exception cref="ObjectDisposedException">The method is called after the file has been closed.</exception>
         public void Add(uint type, uint group, uint instance, byte[] data, bool compress)
         {
+            AddOrUpdate(type, group, instance, data, compress);
+        }
+
+        /// <summary>
+        /// Add an entry to the file, or updates an existing entry.
+        /// </summary>
+        /// <param name="type">he TGI group id of the file entry.</param>
+        /// <param name="group">The TGI group id of the file entry.</param>
+        /// <param name="instance">The TGI instance id of the file entry.</param>
+        /// <param name="data">The item data.</param>
+        /// <param name="compress">
+        /// <see langword="true"/> if the data should be compressed; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null</exception>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been closed.</exception>
+        public void AddOrUpdate(uint type, uint group, uint instance, byte[] data, bool compress)
+        {
             ArgumentNullException.ThrowIfNull(data);
             VerifyNotDisposed();
 
             DBPFEntry item = new(data, compress);
 
-            this.indices.Add(new DBPFIndexEntry(type, group, instance, item));
+            DBPFIndexEntry? index = this.indices.Find(type, group, instance);
+
+            if (index != null)
+            {
+                index.IndexState = DatIndexState.Modified;
+                index.Entry = item;
+            }
+            else
+            {
+                this.indices.Add(new DBPFIndexEntry(type, group, instance, item));
+            }
 
             this.IsDirty = true;
         }
@@ -433,6 +460,30 @@ namespace DBPFSharp
                 // Open the new file to prevent a NullRefrenceException if GetEntry is called.
                 this.stream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
             }
+        }
+
+        /// <summary>
+        /// Updates an existing entry.
+        /// </summary>
+        /// <param name="type">he TGI group id of the file entry.</param>
+        /// <param name="group">The TGI group id of the file entry.</param>
+        /// <param name="instance">The TGI instance id of the file entry.</param>
+        /// <param name="data">The item data.</param>
+        /// <param name="compress">
+        /// <see langword="true"/> if the data should be compressed; otherwise, <see langword="false"/>.
+        /// </param>
+        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
+        /// <exception cref="DBPFException">The specified entry does not exist in the file.</exception>
+        /// <exception cref="ObjectDisposedException">The method is called after the file has been closed.</exception>
+        public void Update(uint type, uint group, uint instance, byte[] data, bool compress)
+        {
+            ArgumentNullException.ThrowIfNull(data);
+            VerifyNotDisposed();
+
+            DBPFIndexEntry index = this.indices.Find(type, group, instance) ?? throw new DBPFException(Resources.SpecifiedIndexDoesNotExist);
+
+            index.Entry = new DBPFEntry(data, compress);
+            index.IndexState = DatIndexState.Modified;
         }
 
         /// <summary>
