@@ -77,10 +77,7 @@ namespace DBPFSharp
         /// <exception cref="ArgumentNullException"><paramref name="input" /> is null.</exception>
         public static byte[]? Compress(byte[] input, bool prefixLength)
         {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
+            ArgumentNullException.ThrowIfNull(input);
 
             if (input.Length < UncompressedDataMinSize || input.Length > UncompressedDataMaxSize)
             {
@@ -99,10 +96,7 @@ namespace DBPFSharp
         /// <exception cref="NotSupportedException"><paramref name="compressedData"/> uses an unsupported compression format.</exception>
         public static byte[] Decompress(byte[] compressedData)
         {
-            if (compressedData == null)
-            {
-                throw new ArgumentNullException(nameof(compressedData));
-            }
+            ArgumentNullException.ThrowIfNull(compressedData);
 
             int headerStartOffset = 0;
 

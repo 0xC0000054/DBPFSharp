@@ -65,10 +65,7 @@ namespace DBPFSharp
         [SkipLocalsInit]
         internal DBPFHeader(Stream input)
         {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
+            ArgumentNullException.ThrowIfNull(input);
 
             input.Position = 0L;
 

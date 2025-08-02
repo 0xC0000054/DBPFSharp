@@ -55,10 +55,7 @@ namespace DBPFSharp
         /// <exception cref="ArgumentNullException"><paramref name="stream"/> is null.</exception>
         internal void Save(Stream stream)
         {
-            if (stream == null)
-            {
-                throw new ArgumentNullException(nameof(stream));
-            }
+            ArgumentNullException.ThrowIfNull(stream);
 
             stream.WriteUInt32(this.Type);
             stream.WriteUInt32(this.Group);
