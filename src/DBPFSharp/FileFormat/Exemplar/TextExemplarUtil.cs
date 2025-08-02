@@ -32,9 +32,13 @@ namespace DBPFSharp.FileFormat.Exemplar
                 throw new DBPFException("Invalid text exemplar ParentCohort property.");
             }
 
-            return new TGI(ParseHexNumberUInt32(data[ranges[0]]),
-                           ParseHexNumberUInt32(data[ranges[1]]),
-                           ParseHexNumberUInt32(data[ranges[2]]));
+            // Text exemplars use the order: group, instance, type.
+
+            uint group = ParseHexNumberUInt32(data[ranges[0]]);
+            uint instance = ParseHexNumberUInt32(data[ranges[1]]);
+            uint type = ParseHexNumberUInt32(data[ranges[2]]);
+
+            return new TGI(type, group, instance);
         }
 
         internal static int ParsePropertyCount(ReadOnlySpan<char> line)
@@ -229,7 +233,7 @@ namespace DBPFSharp.FileFormat.Exemplar
         }
 
         internal static string ParseString(ReadOnlySpan<char> span)
-        { 
+        {
             return span.Trim('"').ToString();
         }
 
