@@ -22,7 +22,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// <param name="value">The property value.</param>
         public ExemplarPropertyBoolean(uint id, bool value) : base(id, 0)
         {
-            Values = Array.AsReadOnly([value]);
+            this.Values = Array.AsReadOnly([value]);
         }
 
         /// <summary>
@@ -43,15 +43,15 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
 
             List<bool> valuesCopy = [.. values];
 
-            Values = valuesCopy.AsReadOnly();
-            RepCount = valuesCopy.Count == 1 ? 0 : valuesCopy.Count;
+            this.Values = valuesCopy.AsReadOnly();
+            this.RepCount = valuesCopy.Count == 1 ? 0 : valuesCopy.Count;
         }
 
         internal ExemplarPropertyBoolean(uint id,
                                          BinaryReader reader,
                                          int repCount) : base(id, repCount)
         {
-            Values = Decode(reader, repCount);
+            this.Values = Decode(reader, repCount);
         }
 
         /// <inheritdoc/>
@@ -70,7 +70,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         {
             const int MaxStackLimit = 256;
             
-            IReadOnlyList<bool> values = Values;
+            IReadOnlyList<bool> values = this.Values;
 
             int count = values.Count;
 

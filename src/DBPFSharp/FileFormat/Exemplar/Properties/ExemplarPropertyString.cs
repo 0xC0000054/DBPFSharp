@@ -22,15 +22,15 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null.</exception>
         public ExemplarPropertyString(uint id, string value) : base(id)
         {
-            Value = value ?? throw new ArgumentNullException(nameof(value));
-            RepCount = Encoding.ASCII.GetByteCount(value);
+            this.Value = value ?? throw new ArgumentNullException(nameof(value));
+            this.RepCount = Encoding.ASCII.GetByteCount(value);
         }
 
         internal ExemplarPropertyString(uint id,
                                         BinaryReader reader,
                                         int repCount) : base(id, repCount)
         {
-            Value = Decode(reader, repCount);
+            this.Value = Decode(reader, repCount);
         }
 
         /// <inheritdoc/>
@@ -52,11 +52,11 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
 
             // Because the strings are ASCII encoded, the repetition count is
             // equal to the string length in bytes.
-            int bytesNeeded = RepCount;
+            int bytesNeeded = this.RepCount;
 
             Span<byte> buffer = bytesNeeded <= MaxStackLimit ? stackalloc byte[bytesNeeded] : new byte[bytesNeeded];
 
-            int bytesWritten = Encoding.ASCII.GetBytes(Value, buffer);
+            int bytesWritten = Encoding.ASCII.GetBytes(this.Value, buffer);
 
             if (bytesWritten != bytesNeeded)
             {

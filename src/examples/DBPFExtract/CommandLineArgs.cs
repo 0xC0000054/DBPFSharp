@@ -14,7 +14,7 @@ namespace DBPFextract
         {
             if (args != null && args.Length > 0)
             {
-                HaveTGI = false;
+                this.HaveTGI = false;
                 string tgi = string.Empty;
                 string outputFile = string.Empty;
 
@@ -35,10 +35,10 @@ namespace DBPFextract
                         && ParseHexNumber(parts[1], out uint group)
                         && ParseHexNumber(parts[2], out uint instance))
                     {
-                        Type = type;
-                        Group = group;
-                        Instance = instance;
-                        HaveTGI = true;
+                        this.Type = type;
+                        this.Group = group;
+                        this.Instance = instance;
+                        this.HaveTGI = true;
                     }
                     else
                     {
@@ -46,11 +46,11 @@ namespace DBPFextract
                     }
                 }
 
-                OutputFile = outputFile;
+                this.OutputFile = outputFile;
 
                 if (remainingArgs.Count == 1)
                 {
-                    InputFile = remainingArgs[0];
+                    this.InputFile = remainingArgs[0];
                 }
                 else
                 {

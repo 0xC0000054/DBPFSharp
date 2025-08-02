@@ -20,9 +20,9 @@ namespace DBPFSharp.FileFormat.Exemplar
         /// </summary>
         public Exemplar()
         {
-            ParentCohort = TGI.Empty;
-            IsCohort = false;
-            Properties = [];
+            this.ParentCohort = TGI.Empty;
+            this.IsCohort = false;
+            this.Properties = [];
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             if (signature.SequenceEqual(ExemplarBinarySignature)
                 || signature.SequenceEqual(CohortBinarySignature))
             {
-                IsCohort = signature.SequenceEqual(CohortBinarySignature);
+                this.IsCohort = signature.SequenceEqual(CohortBinarySignature);
 
                 using (MemoryStream stream = new(bytes, 8, bytes.Length - 8, false))
                 using (BinaryReader reader = new(stream))
@@ -112,7 +112,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             else if (signature.SequenceEqual(ExemplarTextSignature)
                      || signature.SequenceEqual(CohortTextSignature))
             {
-                IsCohort = signature.SequenceEqual(CohortTextSignature);
+                this.IsCohort = signature.SequenceEqual(CohortTextSignature);
 
                 int firstNewLineIndex = bytesAsSpan.IndexOf((byte)'\n');
 
@@ -135,7 +135,7 @@ namespace DBPFSharp.FileFormat.Exemplar
 
         private void ParseBinaryExemplar(BinaryReader reader)
         {
-            ParentCohort = BinaryExemplarUtil.ReadTGI(reader);
+            this.ParentCohort = BinaryExemplarUtil.ReadTGI(reader);
             int propertyCount = reader.ReadInt32();
 
             SortedList<uint, ExemplarProperty> properties = [];
@@ -152,12 +152,12 @@ namespace DBPFSharp.FileFormat.Exemplar
                 }
             }
 
-            Properties = properties;
+            this.Properties = properties;
         }
 
         private void ParseTextExemplar(StreamReader reader)
         {
-            ParentCohort = TextExemplarUtil.ParseParentCohort(reader.ReadLine());
+            this.ParentCohort = TextExemplarUtil.ParseParentCohort(reader.ReadLine());
 
             int propertyCount = TextExemplarUtil.ParsePropertyCount(reader.ReadLine());
 
@@ -175,17 +175,17 @@ namespace DBPFSharp.FileFormat.Exemplar
                 }
             }
 
-            Properties = properties;
+            this.Properties = properties;
         }
 
         private void EncodeBinaryExemplar(BinaryWriter writer)
         {
-            ReadOnlySpan<byte> signature = IsCohort ? CohortBinarySignature : ExemplarBinarySignature;
+            ReadOnlySpan<byte> signature = this.IsCohort ? CohortBinarySignature : ExemplarBinarySignature;
 
             writer.Write(signature);
-            BinaryExemplarUtil.WriteTGI(writer, ParentCohort);
+            BinaryExemplarUtil.WriteTGI(writer, this.ParentCohort);
 
-            SortedList<uint, ExemplarProperty> properties = Properties;
+            SortedList<uint, ExemplarProperty> properties = this.Properties;
 
             writer.Write(properties.Count);
 

@@ -12,13 +12,13 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
     {
         private protected ExemplarProperty(uint id)
         {
-            Id = id;
+            this.Id = id;
         }
 
         private protected ExemplarProperty(uint id, int repCount)
         {
-            Id = id;
-            RepCount = repCount;
+            this.Id = id;
+            this.RepCount = repCount;
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
 
         internal void EncodeBinary(BinaryWriter stream)
         {
-            ExemplarPropertyHeader.WriteBinary(stream, Id, PropertyDataType, RepCount);
+            ExemplarPropertyHeader.WriteBinary(stream, this.Id, this.PropertyDataType, this.RepCount);
 
             EncodeBinaryData(stream);
         }

@@ -59,22 +59,22 @@ namespace DBPFSharp
 
             try
             {
-                this.Header = new DBPFHeader(stream);
+                this.Header = new DBPFHeader(this.stream);
 
-                int entryCount = checked((int)Header.Entries);
+                int entryCount = checked((int)this.Header.Entries);
 
                 this.indices = new DBPFIndexCollection(entryCount);
                 this.compressionDirectory = new CompressionDirectory();
 
-                this.stream.Seek(Header.IndexLocation, SeekOrigin.Begin);
+                this.stream.Seek(this.Header.IndexLocation, SeekOrigin.Begin);
 
                 for (int i = 0; i < entryCount; i++)
                 {
-                    uint type = stream.ReadUInt32();
-                    uint group = stream.ReadUInt32();
-                    uint instance = stream.ReadUInt32();
-                    uint location = stream.ReadUInt32();
-                    uint size = stream.ReadUInt32();
+                    uint type = this.stream.ReadUInt32();
+                    uint group = this.stream.ReadUInt32();
+                    uint instance = this.stream.ReadUInt32();
+                    uint location = this.stream.ReadUInt32();
+                    uint size = this.stream.ReadUInt32();
 
                     this.indices.Add(new DBPFIndexEntry(type, group, instance, location, size));
                 }
@@ -82,17 +82,17 @@ namespace DBPFSharp
                 DBPFIndexEntry? compressionDirectoryIndex = this.indices.Find(CompressionDirectoryType, CompressionDirectoryGroup, CompressionDirectoryInstance);
                 if (compressionDirectoryIndex != null)
                 {
-                    stream.Seek(compressionDirectoryIndex.Location, SeekOrigin.Begin);
+                    this.stream.Seek(compressionDirectoryIndex.Location, SeekOrigin.Begin);
 
                     int recordCount = (int)(compressionDirectoryIndex.FileSize / CompressionDirectoryEntry.SizeOf);
-                    compressionDirectory.Capacity = recordCount;
+                    this.compressionDirectory.Capacity = recordCount;
 
                     for (int i = 0; i < recordCount; i++)
                     {
-                        uint type = stream.ReadUInt32();
-                        uint group = stream.ReadUInt32();
-                        uint instance = stream.ReadUInt32();
-                        uint uncompressedSize = stream.ReadUInt32();
+                        uint type = this.stream.ReadUInt32();
+                        uint group = this.stream.ReadUInt32();
+                        uint instance = this.stream.ReadUInt32();
+                        uint uncompressedSize = this.stream.ReadUInt32();
 
                         this.compressionDirectory.Add(new CompressionDirectoryEntry(type, group, instance, uncompressedSize));
                     }
@@ -309,7 +309,7 @@ namespace DBPFSharp
                 this.stream!.Seek(index.Location, SeekOrigin.Begin);
                 byte[] data = GC.AllocateUninitializedArray<byte>(checked((int)index.FileSize));
 
-                stream.ReadExactly(data, 0, data.Length);
+                this.stream.ReadExactly(data, 0, data.Length);
 
                 if (this.compressionDirectory.Contains(index))
                 {
@@ -422,7 +422,7 @@ namespace DBPFSharp
 
                 for (int i = 0; i < this.indices.Count; i++)
                 {
-                    DBPFIndexEntry index = indices[i];
+                    DBPFIndexEntry index = this.indices[i];
                     DatIndexState state = index.IndexState;
 
                     switch (state)
@@ -455,7 +455,7 @@ namespace DBPFSharp
 
                             byte[] buffer = new byte[dataSize];
 
-                            stream.ReadExactly(buffer, 0, dataSize);
+                            this.stream.ReadExactly(buffer, 0, dataSize);
 
                             output.Write(buffer, 0, dataSize);
 

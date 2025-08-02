@@ -168,7 +168,7 @@ namespace DBPFSharp
         /// <returns>
         /// A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.
         /// </returns>
-        public override int GetHashCode() => HashCode.Combine(Type, Group, Instance);
+        public override int GetHashCode() => HashCode.Combine(this.Type, this.Group, this.Instance);
 
         /// <summary>
         /// Determines whether two DatIndex instances have the same value.

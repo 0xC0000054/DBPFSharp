@@ -14,7 +14,7 @@ namespace DBPFcreate
         {
             if (args != null && args.Length > 0)
             {
-                Compress = false;
+                this.Compress = false;
                 string tgi = string.Empty;
                 string outputFile = string.Empty;
                 bool compress = false;
@@ -28,13 +28,13 @@ namespace DBPFcreate
 
                 List<string> remainingArgs = options.Parse(args);
 
-                Compress = compress;
+                this.Compress = compress;
 
                 if (TryParseTGIString(tgi, out uint type, out uint group, out uint instance))
                 {
-                    Type = type;
-                    Group = group;
-                    Instance = instance;
+                    this.Type = type;
+                    this.Group = group;
+                    this.Instance = instance;
                 }
                 else
                 {
@@ -43,7 +43,7 @@ namespace DBPFcreate
 
                 if (!string.IsNullOrWhiteSpace(outputFile))
                 {
-                    OutputFile = outputFile;
+                    this.OutputFile = outputFile;
                 }
                 else
                 {
@@ -52,7 +52,7 @@ namespace DBPFcreate
 
                 if (remainingArgs.Count == 1)
                 {
-                    InputFile = remainingArgs[0];
+                    this.InputFile = remainingArgs[0];
                 }
                 else
                 {

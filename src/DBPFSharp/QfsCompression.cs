@@ -329,29 +329,29 @@ namespace DBPFSharp
                 this.input = input;
                 this.inputLength = input.Length;
                 this.output = new byte[this.inputLength - 1];
-                this.outputLength = output.Length;
+                this.outputLength = this.output.Length;
 
                 if (this.inputLength < MaxWindowSize)
                 {
-                    windowSize = 1 << BitOperations.Log2((uint)this.inputLength);
-                    hashSize = Math.Max(windowSize / 2, 32);
-                    hashShift = (BitOperations.TrailingZeroCount(hashSize) + MinMatch - 1) / MinMatch;
+                    this.windowSize = 1 << BitOperations.Log2((uint)this.inputLength);
+                    this.hashSize = Math.Max(this.windowSize / 2, 32);
+                    this.hashShift = (BitOperations.TrailingZeroCount(this.hashSize) + MinMatch - 1) / MinMatch;
                 }
                 else
                 {
-                    windowSize = MaxWindowSize;
-                    hashSize = MaxHashSize;
-                    hashShift = 6;
+                    this.windowSize = MaxWindowSize;
+                    this.hashSize = MaxHashSize;
+                    this.hashShift = 6;
                 }
-                maxWindowOffset = windowSize - 1;
-                windowMask = maxWindowOffset;
-                hashMask = hashSize - 1;
+                this.maxWindowOffset = this.windowSize - 1;
+                this.windowMask = this.maxWindowOffset;
+                this.hashMask = this.hashSize - 1;
 
                 this.hash = 0;
-                this.head = new int[hashSize];
-                this.prev = new int[windowSize];
+                this.head = new int[this.hashSize];
+                this.prev = new int[this.windowSize];
                 this.readPosition = 0;
-                this.remaining = inputLength;
+                this.remaining = this.inputLength;
                 this.outIndex = QfsHeaderSize;
                 this.lastWritePosition = 0;
                 this.prefixLength = prefixLength;
@@ -370,12 +370,12 @@ namespace DBPFSharp
             /// </remarks>
             public byte[]? Compress()
             {
-                this.hash = input[0];
-                this.hash = ((this.hash << hashShift) ^ input[1]) & hashMask;
+                this.hash = this.input[0];
+                this.hash = ((this.hash << this.hashShift) ^ this.input[1]) & this.hashMask;
 
                 int lastMatch = this.inputLength - MinMatch;
 
-                while (remaining > 0)
+                while (this.remaining > 0)
                 {
                     this.prevLength = this.matchLength;
                     int prev_match = this.matchStart;
@@ -387,14 +387,14 @@ namespace DBPFSharp
                     // dictionary, and set hash_head to the head of the hash chain:
                     if (this.remaining >= MinMatch)
                     {
-                        this.hash = ((this.hash << hashShift) ^ input[this.readPosition + MinMatch - 1]) & hashMask;
+                        this.hash = ((this.hash << this.hashShift) ^ this.input[this.readPosition + MinMatch - 1]) & this.hashMask;
 
-                        hash_head = head[this.hash];
-                        prev[this.readPosition & windowMask] = hash_head;
-                        head[this.hash] = this.readPosition;
+                        hash_head = this.head[this.hash];
+                        this.prev[this.readPosition & this.windowMask] = hash_head;
+                        this.head[this.hash] = this.readPosition;
                     }
 
-                    if (hash_head >= 0 && this.prevLength < MaxLazy && this.readPosition - hash_head <= windowSize)
+                    if (hash_head >= 0 && this.prevLength < MaxLazy && this.readPosition - hash_head <= this.windowSize)
                     {
                         int bestLength = LongestMatch(hash_head);
 
@@ -404,7 +404,7 @@ namespace DBPFSharp
 
                             if (bestOffset <= 1024 ||
                                 bestOffset <= 16384 && bestLength >= 4 ||
-                                bestOffset <= windowSize && bestLength >= 5)
+                                bestOffset <= this.windowSize && bestLength >= 5)
                             {
                                 this.matchLength = bestLength;
                             }
@@ -434,15 +434,15 @@ namespace DBPFSharp
 
                             if (this.readPosition < lastMatch)
                             {
-                                this.hash = ((this.hash << hashShift) ^ input[this.readPosition + MinMatch - 1]) & hashMask;
+                                this.hash = ((this.hash << this.hashShift) ^ this.input[this.readPosition + MinMatch - 1]) & this.hashMask;
 
-                                hash_head = head[this.hash];
-                                prev[this.readPosition & windowMask] = hash_head;
-                                head[this.hash] = this.readPosition;
+                                hash_head = this.head[this.hash];
+                                this.prev[this.readPosition & this.windowMask] = hash_head;
+                                this.head[this.hash] = this.readPosition;
                             }
                             this.prevLength--;
                         }
-                        while (prevLength > 0);
+                        while (this.prevLength > 0);
 
                         this.matchLength = MinMatch - 1;
                         this.readPosition++;
@@ -460,17 +460,17 @@ namespace DBPFSharp
                 }
 
                 // Write the compressed data header.
-                output[0] = 0x10;
-                output[1] = 0xFB;
-                output[2] = (byte)((inputLength >> 16) & 0xff);
-                output[3] = (byte)((inputLength >> 8) & 0xff);
-                output[4] = (byte)(inputLength & 0xff);
+                this.output[0] = 0x10;
+                this.output[1] = 0xFB;
+                this.output[2] = (byte)((this.inputLength >> 16) & 0xff);
+                this.output[3] = (byte)((this.inputLength >> 8) & 0xff);
+                this.output[4] = (byte)(this.inputLength & 0xff);
 
                 // Trim the output array to its actual size.
-                if (prefixLength)
+                if (this.prefixLength)
                 {
-                    int finalLength = outIndex + 4;
-                    if (finalLength >= inputLength)
+                    int finalLength = this.outIndex + 4;
+                    if (finalLength >= this.inputLength)
                     {
                         return null;
                     }
@@ -478,23 +478,23 @@ namespace DBPFSharp
                     byte[] temp = new byte[finalLength];
 
                     // Write the compressed data length in little endian byte order.
-                    temp[0] = (byte)(outIndex & 0xff);
-                    temp[1] = (byte)((outIndex >> 8) & 0xff);
-                    temp[2] = (byte)((outIndex >> 16) & 0xff);
-                    temp[3] = (byte)((outIndex >> 24) & 0xff);
+                    temp[0] = (byte)(this.outIndex & 0xff);
+                    temp[1] = (byte)((this.outIndex >> 8) & 0xff);
+                    temp[2] = (byte)((this.outIndex >> 16) & 0xff);
+                    temp[3] = (byte)((this.outIndex >> 24) & 0xff);
 
-                    Buffer.BlockCopy(this.output, 0, temp, 4, outIndex);
+                    Buffer.BlockCopy(this.output, 0, temp, 4, this.outIndex);
                     this.output = temp;
                 }
                 else
                 {
-                    byte[] temp = new byte[outIndex];
-                    Buffer.BlockCopy(this.output, 0, temp, 0, outIndex);
+                    byte[] temp = new byte[this.outIndex];
+                    Buffer.BlockCopy(this.output, 0, temp, 0, this.outIndex);
 
                     this.output = temp;
                 }
 
-                return output;
+                return this.output;
             }
 
             /// <summary>
@@ -668,11 +668,11 @@ namespace DBPFSharp
 
                 if (bestLength >= this.remaining)
                 {
-                    return remaining;
+                    return this.remaining;
                 }
 
-                byte scanEnd1 = input[scan + bestLength - 1];
-                byte scanEnd = input[scan + bestLength];
+                byte scanEnd1 = this.input[scan + bestLength - 1];
+                byte scanEnd = this.input[scan + bestLength];
 
                 // Do not waste too much time if we already have a good match:
                 if (this.prevLength >= GoodLength)
@@ -689,7 +689,7 @@ namespace DBPFSharp
                 }
 
                 int maxLength = Math.Min(this.remaining, MaxMatch);
-                int limit = this.readPosition > maxWindowOffset ? this.readPosition - maxWindowOffset : 0;
+                int limit = this.readPosition > this.maxWindowOffset ? this.readPosition - this.maxWindowOffset : 0;
 
                 do
                 {
@@ -697,10 +697,10 @@ namespace DBPFSharp
 
                     // Skip to next match if the match length cannot increase
                     // or if the match length is less than 2:
-                    if (input[match + bestLength] != scanEnd ||
-                        input[match + bestLength - 1] != scanEnd1 ||
-                        input[match] != input[scan] ||
-                        input[match + 1] != input[scan + 1])
+                    if (this.input[match + bestLength] != scanEnd ||
+                        this.input[match + bestLength - 1] != scanEnd1 ||
+                        this.input[match] != this.input[scan] ||
+                        this.input[match + 1] != this.input[scan + 1])
                     {
                         continue;
                     }
@@ -710,7 +710,7 @@ namespace DBPFSharp
                     {
                         len++;
                     }
-                    while (len < maxLength && input[scan + len] == input[match + len]);
+                    while (len < maxLength && this.input[scan + len] == this.input[match + len]);
 
                     if (len > bestLength)
                     {
@@ -720,11 +720,11 @@ namespace DBPFSharp
                         {
                             break;
                         }
-                        scanEnd1 = input[scan + bestLength - 1];
-                        scanEnd = input[scan + bestLength];
+                        scanEnd1 = this.input[scan + bestLength - 1];
+                        scanEnd = this.input[scan + bestLength];
                     }
                 }
-                while ((currentMatch = prev[currentMatch & windowMask]) >= limit && --chainLength > 0);
+                while ((currentMatch = this.prev[currentMatch & this.windowMask]) >= limit && --chainLength > 0);
 
                 return bestLength;
             }

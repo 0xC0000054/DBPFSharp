@@ -53,21 +53,21 @@ namespace DBPFSharp
         /// <inheritdoc/>
         public bool Equals(TGI other)
         {
-            return Type == other.Type
-                   && Group == other.Group
-                   && Instance == other.Instance;
+            return this.Type == other.Type
+                   && this.Group == other.Group
+                   && this.Instance == other.Instance;
         }
 
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return HashCode.Combine(Type, Group, Instance);
+            return HashCode.Combine(this.Type, this.Group, this.Instance);
         }
 
         /// <inheritdoc/>
         public override string? ToString()
         {
-            return $"Type=0x{Type:X8}, Group=0x{Group:X8}, Instance=0x{Instance:X8}";
+            return $"Type=0x{this.Type:X8}, Group=0x{this.Group:X8}, Instance=0x{this.Instance:X8}";
         }
 
         /// <inheritdoc/>

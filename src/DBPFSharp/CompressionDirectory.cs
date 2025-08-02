@@ -23,11 +23,11 @@ namespace DBPFSharp
 
         public CompressionDirectoryEntry this[int index]
         {
-            get => entries[index];
-            set => entries[index] = value;
+            get => this.entries[index];
+            set => this.entries[index] = value;
         }
 
-        public int Count => entries.Count;
+        public int Count => this.entries.Count;
 
         public int Capacity
         {
@@ -37,11 +37,11 @@ namespace DBPFSharp
 
         bool ICollection<CompressionDirectoryEntry>.IsReadOnly => false;
 
-        public ReadOnlyCollection<CompressionDirectoryEntry> AsReadOnly() => entries.AsReadOnly();
+        public ReadOnlyCollection<CompressionDirectoryEntry> AsReadOnly() => this.entries.AsReadOnly();
 
-        public void Add(CompressionDirectoryEntry item) => entries.Add(item);
+        public void Add(CompressionDirectoryEntry item) => this.entries.Add(item);
 
-        public void Clear() => entries.Clear();
+        public void Clear() => this.entries.Clear();
 
         public bool Contains(DBPFIndexEntry index)
         {
@@ -50,9 +50,9 @@ namespace DBPFSharp
             return Find(index.Type, index.Group, index.Instance) != null;
         }
 
-        public bool Contains(CompressionDirectoryEntry item) => entries.Contains(item);
+        public bool Contains(CompressionDirectoryEntry item) => this.entries.Contains(item);
 
-        public void CopyTo(CompressionDirectoryEntry[] array, int arrayIndex) => entries.CopyTo(array, arrayIndex);
+        public void CopyTo(CompressionDirectoryEntry[] array, int arrayIndex) => this.entries.CopyTo(array, arrayIndex);
 
         public CompressionDirectoryEntry? Find(uint type, uint group, uint instance)
         {
@@ -68,16 +68,16 @@ namespace DBPFSharp
             return null;
         }
 
-        public IEnumerator<CompressionDirectoryEntry> GetEnumerator() => entries.GetEnumerator();
+        public IEnumerator<CompressionDirectoryEntry> GetEnumerator() => this.entries.GetEnumerator();
 
-        public int IndexOf(CompressionDirectoryEntry item) => entries.IndexOf(item);
+        public int IndexOf(CompressionDirectoryEntry item) => this.entries.IndexOf(item);
 
-        public void Insert(int index, CompressionDirectoryEntry item) => entries.Insert(index, item);
+        public void Insert(int index, CompressionDirectoryEntry item) => this.entries.Insert(index, item);
 
-        public bool Remove(CompressionDirectoryEntry item) => entries.Remove(item);
+        public bool Remove(CompressionDirectoryEntry item) => this.entries.Remove(item);
 
-        public void RemoveAt(int index) => entries.RemoveAt(index);
+        public void RemoveAt(int index) => this.entries.RemoveAt(index);
 
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)entries).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)this.entries).GetEnumerator();
     }
 }

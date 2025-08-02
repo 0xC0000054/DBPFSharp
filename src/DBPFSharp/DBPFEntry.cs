@@ -110,11 +110,11 @@ namespace DBPFSharp
             uint bytesWritten;
             bool isCompressed;
 
-            if (IsCompressed)
+            if (this.IsCompressed)
             {
                 if (this.compressedData is null)
                 {
-                    throw new InvalidOperationException($"{nameof(IsCompressed)} is true when the compressed data is null.");
+                    throw new InvalidOperationException($"{nameof(this.IsCompressed)} is true when the compressed data is null.");
                 }
 
                 stream.Write(this.compressedData, 0, this.compressedData.Length);
@@ -125,10 +125,10 @@ namespace DBPFSharp
             {
                 if (this.uncompressedData is null)
                 {
-                    throw new InvalidOperationException($"{nameof(IsCompressed)} is false when the uncompressed data is null.");
+                    throw new InvalidOperationException($"{nameof(this.IsCompressed)} is false when the uncompressed data is null.");
                 }
 
-                if (shouldBeCompressed)
+                if (this.shouldBeCompressed)
                 {
                     byte[]? data = QfsCompression.Compress(this.uncompressedData, prefixLength: true);
 

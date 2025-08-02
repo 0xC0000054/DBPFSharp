@@ -21,7 +21,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// <param name="value">The property value.</param>
         public ExemplarPropertyUInt8(uint id, byte value) : base(id, 0)
         {
-            Values = Array.AsReadOnly([value]);
+            this.Values = Array.AsReadOnly([value]);
         }
 
         /// <summary>
@@ -42,15 +42,15 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
 
             List<byte> valuesCopy = [.. values];
 
-            Values = valuesCopy.AsReadOnly();
-            RepCount = valuesCopy.Count == 1 ? 0 : valuesCopy.Count;
+            this.Values = valuesCopy.AsReadOnly();
+            this.RepCount = valuesCopy.Count == 1 ? 0 : valuesCopy.Count;
         }
 
         internal ExemplarPropertyUInt8(uint id,
                                        BinaryReader reader,
                                        int repCount) : base(id, repCount)
         {
-            Values = Array.AsReadOnly(reader.ReadBytes(repCount));
+            this.Values = Array.AsReadOnly(reader.ReadBytes(repCount));
         }
 
         /// <inheritdoc/>
@@ -66,7 +66,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
 
         private protected override void EncodeBinaryData(BinaryWriter writer)
         {
-            byte[] data = [.. Values];
+            byte[] data = [.. this.Values];
 
             writer.Write(data, 0, data.Length);
         }
