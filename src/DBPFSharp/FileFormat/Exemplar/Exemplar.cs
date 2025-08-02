@@ -30,15 +30,12 @@ namespace DBPFSharp.FileFormat.Exemplar
         /// </summary>
         /// <param name="data">The data.</param>
         /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
-        // Non-nullable field must contain a non-null value when exiting constructor.
-        // Consider adding the 'required' modifier or declaring as nullable.
-        //
-        // Code analysis doesn't see that the properties are set in Decode, which
-        // is called from the base class constructor.
-#pragma warning disable CS8618
-        public Exemplar(byte[] data) : base(data)
-#pragma warning restore CS8618
+        public Exemplar(byte[] data)
         {
+            (TGI parentCohort, bool isCohort, SortedList<uint, ExemplarProperty> properties) = Decode(data);
+            this.ParentCohort = parentCohort;
+            this.IsCohort = isCohort;
+            this.Properties = properties;
         }
 
         /// <summary>
@@ -63,7 +60,7 @@ namespace DBPFSharp.FileFormat.Exemplar
         /// <value>
         /// The exemplar properties.
         /// </value>
-        public SortedList<uint, ExemplarProperty> Properties { get; private set; }
+        public SortedList<uint, ExemplarProperty> Properties { get; }
 
         private static ReadOnlySpan<byte> CohortBinarySignature => "CQZB1###"u8;
 
@@ -92,27 +89,30 @@ namespace DBPFSharp.FileFormat.Exemplar
             return bytes;
         }
 
-        /// <inheritdoc/>
-        private protected override void Decode(byte[] bytes)
+        private static (TGI parentCohort, bool isCohort, SortedList<uint, ExemplarProperty> properties) Decode(byte[] bytes)
         {
             ReadOnlySpan<byte> bytesAsSpan = bytes;
             ReadOnlySpan<byte> signature = bytesAsSpan[..8];
 
+            TGI parentCohort;
+            bool isCohort;
+            SortedList<uint, ExemplarProperty> properties;
+
             if (signature.SequenceEqual(ExemplarBinarySignature)
                 || signature.SequenceEqual(CohortBinarySignature))
             {
-                this.IsCohort = signature.SequenceEqual(CohortBinarySignature);
+                isCohort = signature.SequenceEqual(CohortBinarySignature);
 
                 using (MemoryStream stream = new(bytes, 8, bytes.Length - 8, false))
                 using (BinaryReader reader = new(stream))
                 {
-                    ParseBinaryExemplar(reader);
+                    (parentCohort, properties) = ParseBinaryExemplar(reader);
                 }
             }
             else if (signature.SequenceEqual(ExemplarTextSignature)
                      || signature.SequenceEqual(CohortTextSignature))
             {
-                this.IsCohort = signature.SequenceEqual(CohortTextSignature);
+                isCohort = signature.SequenceEqual(CohortTextSignature);
 
                 int firstNewLineIndex = bytesAsSpan.IndexOf((byte)'\n');
 
@@ -124,18 +124,20 @@ namespace DBPFSharp.FileFormat.Exemplar
                 using (MemoryStream stream = new(bytes, firstNewLineIndex + 1, bytes.Length - 1 - firstNewLineIndex, false))
                 using (StreamReader reader = new(stream))
                 {
-                    ParseTextExemplar(reader);
+                    (parentCohort, properties) = ParseTextExemplar(reader);
                 }
             }
             else
             {
                 throw new InvalidOperationException("The item is not a supported cohort or exemplar format.");
             }
+
+            return (parentCohort, isCohort, properties);
         }
 
-        private void ParseBinaryExemplar(BinaryReader reader)
+        private static (TGI parentCohort, SortedList<uint, ExemplarProperty> properties) ParseBinaryExemplar(BinaryReader reader)
         {
-            this.ParentCohort = BinaryExemplarUtil.ReadTGI(reader);
+            TGI parentCohort = BinaryExemplarUtil.ReadTGI(reader);
             int propertyCount = reader.ReadInt32();
 
             SortedList<uint, ExemplarProperty> properties = [];
@@ -152,12 +154,12 @@ namespace DBPFSharp.FileFormat.Exemplar
                 }
             }
 
-            this.Properties = properties;
+            return (parentCohort, properties);
         }
 
-        private void ParseTextExemplar(StreamReader reader)
+        private static (TGI parentCohort, SortedList<uint, ExemplarProperty> properties) ParseTextExemplar(StreamReader reader)
         {
-            this.ParentCohort = TextExemplarUtil.ParseParentCohort(reader.ReadLine());
+            TGI parentCohort = TextExemplarUtil.ParseParentCohort(reader.ReadLine());
 
             int propertyCount = TextExemplarUtil.ParsePropertyCount(reader.ReadLine());
 
@@ -175,7 +177,7 @@ namespace DBPFSharp.FileFormat.Exemplar
                 }
             }
 
-            this.Properties = properties;
+            return (parentCohort, properties);
         }
 
         private void EncodeBinaryExemplar(BinaryWriter writer)

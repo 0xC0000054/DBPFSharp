@@ -15,20 +15,6 @@ namespace DBPFSharp.FileFormat
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FileFormat"/> class.
-        /// </summary>
-        /// <param name="data">The data.</param>
-        /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
-        private protected FileFormat(byte[] data)
-        {
-            ArgumentNullException.ThrowIfNull(data, nameof(data));
-
-            Decode(data);
-        }
-
-        private protected abstract void Decode(byte[] data);
-
-        /// <summary>
         /// Encodes the data to a byte array.
         /// </summary>
         /// <returns>The encoded data.</returns>
