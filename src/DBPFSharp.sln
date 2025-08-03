@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBPFextract", "examples\DBP
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBPFcreate", "examples\DBPFcreate\DBPFcreate.csproj", "{F70C57B8-F014-4387-A76D-F5F6990AC726}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceParsing", "examples\ResourceParsing\ResourceParsing.csproj", "{8EC82223-7E9D-4C0B-AB0C-11924D4C0C77}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F70C57B8-F014-4387-A76D-F5F6990AC726}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F70C57B8-F014-4387-A76D-F5F6990AC726}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F70C57B8-F014-4387-A76D-F5F6990AC726}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EC82223-7E9D-4C0B-AB0C-11924D4C0C77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EC82223-7E9D-4C0B-AB0C-11924D4C0C77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EC82223-7E9D-4C0B-AB0C-11924D4C0C77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EC82223-7E9D-4C0B-AB0C-11924D4C0C77}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
