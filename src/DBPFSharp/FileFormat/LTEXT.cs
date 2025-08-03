@@ -158,7 +158,7 @@ namespace DBPFSharp.FileFormat
         private static class Header
         {
             internal const int SizeOf = 4;
-            internal const int TextMaxLength = 0xFF_FF_FF;
+            internal const int TextMaxLength = 0xFF_FF;
 
             /// <summary>
             /// Reads the LTEXT header.
