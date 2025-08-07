@@ -57,16 +57,23 @@ namespace DBPFSharp.FileFormat.Exemplar
         {
             List<bool> result = new(count);
 
-            if (count > 1)
+            if (span.IsEmpty)
             {
-                foreach (var segment in span.Split(ArrayDelimiter))
-                {
-                    result.Add(ParseBoolean(span[segment]));
-                }
+                result.Add(false);
             }
             else
             {
-                result.Add(ParseBoolean(span));
+                if (count > 1)
+                {
+                    foreach (var segment in span.Split(ArrayDelimiter))
+                    {
+                        result.Add(ParseBoolean(span[segment]));
+                    }
+                }
+                else
+                {
+                    result.Add(ParseBoolean(span));
+                }
             }
 
             return result;
@@ -76,16 +83,23 @@ namespace DBPFSharp.FileFormat.Exemplar
         {
             List<float> result = new(count);
 
-            if (count > 1)
+            if (span.IsEmpty)
             {
-                foreach (var segment in span.Split(ArrayDelimiter))
-                {
-                    result.Add(ParseFloat32(span[segment]));
-                }
+                result.Add(0);
             }
             else
             {
-                result.Add(ParseFloat32(span));
+                if (count > 1)
+                {
+                    foreach (var segment in span.Split(ArrayDelimiter))
+                    {
+                        result.Add(ParseFloat32(span[segment]));
+                    }
+                }
+                else
+                {
+                    result.Add(ParseFloat32(span));
+                }
             }
 
             return result;
@@ -95,16 +109,23 @@ namespace DBPFSharp.FileFormat.Exemplar
         {
             List<int> result = new(count);
 
-            if (count > 1)
+            if (span.IsEmpty)
             {
-                foreach (var segment in span.Split(ArrayDelimiter))
-                {
-                    result.Add(ParseHexNumberSInt32(span[segment]));
-                }
+                result.Add(0);
             }
             else
             {
-                result.Add(ParseHexNumberSInt32(span));
+                if (count > 1)
+                {
+                    foreach (var segment in span.Split(ArrayDelimiter))
+                    {
+                        result.Add(ParseHexNumberSInt32(span[segment]));
+                    }
+                }
+                else
+                {
+                    result.Add(ParseHexNumberSInt32(span));
+                }
             }
 
             return result;
@@ -114,16 +135,23 @@ namespace DBPFSharp.FileFormat.Exemplar
         {
             List<long> result = new(count);
 
-            if (count > 1)
+            if (span.IsEmpty)
             {
-                foreach (var segment in span.Split(ArrayDelimiter))
-                {
-                    result.Add(ParseHexNumberSInt64(span[segment]));
-                }
+                result.Add(0);
             }
             else
             {
-                result.Add(ParseHexNumberSInt64(span));
+                if (count > 1)
+                {
+                    foreach (var segment in span.Split(ArrayDelimiter))
+                    {
+                        result.Add(ParseHexNumberSInt64(span[segment]));
+                    }
+                }
+                else
+                {
+                    result.Add(ParseHexNumberSInt64(span));
+                }
             }
 
             return result;
@@ -133,16 +161,23 @@ namespace DBPFSharp.FileFormat.Exemplar
         {
             List<byte> result = new(count);
 
-            if (count > 1)
+            if (span.IsEmpty)
             {
-                foreach (var segment in span.Split(ArrayDelimiter))
-                {
-                    result.Add(ParseHexNumberUInt8(span[segment]));
-                }
+                result.Add(0);
             }
             else
             {
-                result.Add(ParseHexNumberUInt8(span));
+                if (count > 1)
+                {
+                    foreach (var segment in span.Split(ArrayDelimiter))
+                    {
+                        result.Add(ParseHexNumberUInt8(span[segment]));
+                    }
+                }
+                else
+                {
+                    result.Add(ParseHexNumberUInt8(span));
+                }
             }
 
             return result;
@@ -152,16 +187,23 @@ namespace DBPFSharp.FileFormat.Exemplar
         {
             List<ushort> result = new(count);
 
-            if (count > 1)
+            if (span.IsEmpty)
             {
-                foreach (var segment in span.Split(ArrayDelimiter))
-                {
-                    result.Add(ParseHexNumberUInt16(span[segment]));
-                }
+                result.Add(0);
             }
             else
             {
-                result.Add(ParseHexNumberUInt16(span));
+                if (count > 1)
+                {
+                    foreach (var segment in span.Split(ArrayDelimiter))
+                    {
+                        result.Add(ParseHexNumberUInt16(span[segment]));
+                    }
+                }
+                else
+                {
+                    result.Add(ParseHexNumberUInt16(span));
+                }
             }
 
             return result;
@@ -171,16 +213,23 @@ namespace DBPFSharp.FileFormat.Exemplar
         {
             List<uint> result = new(count);
 
-            if (count > 1)
+            if (span.IsEmpty)
             {
-                foreach (var segment in span.Split(ArrayDelimiter))
-                {
-                    result.Add(ParseHexNumberUInt32(span[segment]));
-                }
+                result.Add(0);
             }
             else
             {
-                result.Add(ParseHexNumberUInt32(span));
+                if (count > 1)
+                {
+                    foreach (var segment in span.Split(ArrayDelimiter))
+                    {
+                        result.Add(ParseHexNumberUInt32(span[segment]));
+                    }
+                }
+                else
+                {
+                    result.Add(ParseHexNumberUInt32(span));
+                }
             }
 
             return result;
