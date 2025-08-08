@@ -589,7 +589,7 @@ namespace DBPFSharp
         {
             if (this.indices.Count > 0)
             {
-                this.indices.RemoveAll(new Predicate<DBPFIndexEntry>(index => (index.IndexState == DatIndexState.Deleted || index.Type == CompressionDirectoryType)));
+                this.indices.RemoveAll(new Predicate<DBPFIndexEntry>(index => index.IndexState == DatIndexState.Deleted || index.Type == CompressionDirectoryType));
             }
         }
 

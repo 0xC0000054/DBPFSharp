@@ -176,9 +176,9 @@ namespace DBPFSharp
                     controlByte4 = compressedData[index];
                     index++;
 
-                    plainCount = (controlByte1 & 3);
+                    plainCount = controlByte1 & 3;
                     copyCount = ((controlByte1 & 0x0C) << 6) + controlByte4 + 5;
-                    copyOffset = (((controlByte1 & 0x10) << 12) + (controlByte2 << 8)) + controlByte3 + 1;
+                    copyOffset = ((controlByte1 & 0x10) << 12) + (controlByte2 << 8) + controlByte3 + 1;
                 }
                 else if (controlByte1 >= 0x80) // 3 byte op code 0x80 - 0xBF
                 {
@@ -196,7 +196,7 @@ namespace DBPFSharp
                     controlByte2 = compressedData[index];
                     index++;
 
-                    plainCount = (controlByte1 & 3);
+                    plainCount = controlByte1 & 3;
                     copyCount = ((controlByte1 & 0x1C) >> 2) + 3;
                     copyOffset = ((controlByte1 & 0x60) << 3) + controlByte2 + 1;
                 }
@@ -225,7 +225,7 @@ namespace DBPFSharp
             if (index < length && outIndex < outLength)
             {
                 // 1 byte EOF op code 0xFC - 0xFF.
-                plainCount = (compressedData[index] & 3);
+                plainCount = compressedData[index] & 3;
                 index++;
 
                 for (int i = 0; i < plainCount; i++)
@@ -419,7 +419,7 @@ namespace DBPFSharp
                         // enough lookahead, the last two strings are not inserted in
                         // the hash table.
 
-                        this.remaining -= (this.prevLength - 1);
+                        this.remaining -= this.prevLength - 1;
                         this.prevLength -= 2;
 
                         do
@@ -546,7 +546,7 @@ namespace DBPFSharp
                         return false; // data did not compress
                     }
 
-                    this.output[this.outIndex] = (byte)((((copyOffset >> 8) << 5) + ((copyLength - 3) << 2)) + run);
+                    this.output[this.outIndex] = (byte)(((copyOffset >> 8) << 5) + ((copyLength - 3) << 2) + run);
                     this.output[this.outIndex + 1] = (byte)(copyOffset & 0xff);
                     this.outIndex += 2;
                 }
@@ -569,7 +569,7 @@ namespace DBPFSharp
                         return false; // data did not compress
                     }
 
-                    this.output[this.outIndex] = (byte)(((0xC0 + ((copyOffset >> 16) << 4)) + (((copyLength - 5) >> 8) << 2)) + run);
+                    this.output[this.outIndex] = (byte)(0xC0 + ((copyOffset >> 16) << 4) + (((copyLength - 5) >> 8) << 2) + run);
                     this.output[this.outIndex + 1] = (byte)((copyOffset >> 8) & 0xff);
                     this.output[this.outIndex + 2] = (byte)(copyOffset & 0xff);
                     this.output[this.outIndex + 3] = (byte)((copyLength - 5) & 0xff);

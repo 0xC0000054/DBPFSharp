@@ -178,7 +178,7 @@ namespace DBPFSharp.FileFormat
                 // the upper byte containing the encoding.
 
                 int textLength = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16);
-                FileEncoding encoding = (FileEncoding)(bytes[3]);
+                FileEncoding encoding = (FileEncoding)bytes[3];
 
                 return (textLength, encoding);
             }
