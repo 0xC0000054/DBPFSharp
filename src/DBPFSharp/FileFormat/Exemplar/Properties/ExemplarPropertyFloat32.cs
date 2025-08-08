@@ -30,15 +30,9 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// <param name="id">The property identifier.</param>
         /// <param name="values">The property values.</param>
         /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="values"/> must have at least one item.</exception>
         public ExemplarPropertyFloat32(uint id, IReadOnlyList<float> values) : base(id)
         {
             ArgumentNullException.ThrowIfNull(values, nameof(values));
-
-            if (values.Count == 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(values), "Must have at least one item.");
-            }
 
             List<float> valuesCopy = [.. values];
 

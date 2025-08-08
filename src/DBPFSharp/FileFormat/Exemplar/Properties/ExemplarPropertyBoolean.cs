@@ -31,15 +31,9 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// <param name="id">The property identifier.</param>
         /// <param name="values">The property values.</param>
         /// <exception cref="ArgumentNullException"><paramref name="values"/> is null.</exception>
-        /// <exception cref="ArgumentOutOfRangeException"><paramref name="values"/> must have at least one item.</exception>
         public ExemplarPropertyBoolean(uint id, IReadOnlyList<bool> values) : base(id)
         {
             ArgumentNullException.ThrowIfNull(values, nameof(values));
-
-            if (values.Count == 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(values), "Must have at least one item.");
-            }
 
             List<bool> valuesCopy = [.. values];
 
@@ -69,7 +63,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         private protected override void EncodeBinaryData(BinaryWriter writer)
         {
             const int MaxStackLimit = 256;
-            
+
             IReadOnlyList<bool> values = this.Values;
 
             int count = values.Count;
