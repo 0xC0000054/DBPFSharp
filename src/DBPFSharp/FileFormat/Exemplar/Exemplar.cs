@@ -32,7 +32,7 @@ namespace DBPFSharp.FileFormat.Exemplar
         /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
         public Exemplar(byte[] data)
         {
-            (TGI parentCohort, bool isCohort, SortedList<uint, ExemplarProperty> properties) = Decode(data);
+            (TGI parentCohort, bool isCohort, ExemplarPropertyCollection properties) = Decode(data);
             this.ParentCohort = parentCohort;
             this.IsCohort = isCohort;
             this.Properties = properties;
@@ -60,7 +60,7 @@ namespace DBPFSharp.FileFormat.Exemplar
         /// <value>
         /// The exemplar properties.
         /// </value>
-        public SortedList<uint, ExemplarProperty> Properties { get; }
+        public ExemplarPropertyCollection Properties { get; }
 
         private static ReadOnlySpan<byte> CohortBinarySignature => "CQZB1###"u8;
 
@@ -89,14 +89,14 @@ namespace DBPFSharp.FileFormat.Exemplar
             return bytes;
         }
 
-        private static (TGI parentCohort, bool isCohort, SortedList<uint, ExemplarProperty> properties) Decode(byte[] bytes)
+        private static (TGI parentCohort, bool isCohort, ExemplarPropertyCollection properties) Decode(byte[] bytes)
         {
             ReadOnlySpan<byte> bytesAsSpan = bytes;
             ReadOnlySpan<byte> signature = bytesAsSpan[..8];
 
             TGI parentCohort;
             bool isCohort;
-            SortedList<uint, ExemplarProperty> properties;
+            ExemplarPropertyCollection properties;
 
             if (signature.SequenceEqual(ExemplarBinarySignature)
                 || signature.SequenceEqual(CohortBinarySignature))
@@ -135,12 +135,12 @@ namespace DBPFSharp.FileFormat.Exemplar
             return (parentCohort, isCohort, properties);
         }
 
-        private static (TGI parentCohort, SortedList<uint, ExemplarProperty> properties) ParseBinaryExemplar(BinaryReader reader)
+        private static (TGI parentCohort, ExemplarPropertyCollection properties) ParseBinaryExemplar(BinaryReader reader)
         {
             TGI parentCohort = BinaryExemplarUtil.ReadTGI(reader);
             int propertyCount = reader.ReadInt32();
 
-            SortedList<uint, ExemplarProperty> properties = [];
+            ExemplarPropertyCollection properties = [];
 
             if (propertyCount > 0)
             {
@@ -150,20 +150,20 @@ namespace DBPFSharp.FileFormat.Exemplar
                 {
                     ExemplarProperty property = ExemplarPropertyFactory.Create(reader);
 
-                    properties.TryAdd(property.Id, property);
+                    properties.TryAdd(property);
                 }
             }
 
             return (parentCohort, properties);
         }
 
-        private static (TGI parentCohort, SortedList<uint, ExemplarProperty> properties) ParseTextExemplar(StreamReader reader)
+        private static (TGI parentCohort, ExemplarPropertyCollection properties) ParseTextExemplar(StreamReader reader)
         {
             TGI parentCohort = TextExemplarUtil.ParseParentCohort(reader.ReadLine());
 
             int propertyCount = TextExemplarUtil.ParsePropertyCount(reader.ReadLine());
 
-            SortedList<uint, ExemplarProperty> properties = [];
+            ExemplarPropertyCollection properties = [];
 
             if (propertyCount > 0)
             {
@@ -173,7 +173,7 @@ namespace DBPFSharp.FileFormat.Exemplar
                 {
                     ExemplarProperty property = ExemplarPropertyFactory.Create(reader.ReadLine());
 
-                    properties.TryAdd(property.Id, property);
+                    properties.TryAdd(property);
                 }
             }
 
@@ -187,13 +187,13 @@ namespace DBPFSharp.FileFormat.Exemplar
             writer.Write(signature);
             BinaryExemplarUtil.WriteTGI(writer, this.ParentCohort);
 
-            SortedList<uint, ExemplarProperty> properties = this.Properties;
+            ExemplarPropertyCollection properties = this.Properties;
 
             writer.Write(properties.Count);
 
             foreach (var property in properties)
             {
-                property.Value.EncodeBinary(writer);
+                property.EncodeBinary(writer);
             }
         }
     }
