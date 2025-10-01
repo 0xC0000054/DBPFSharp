@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace DBPFSharp
 {
@@ -43,6 +44,21 @@ namespace DBPFSharp
         /// Gets the instance id.
         /// </summary>
         public uint Instance { get; }
+
+        /// <summary>
+        /// Generates a random <see cref="uint"/> value for use as a group or instance identifier.
+        /// </summary>
+        /// <returns>
+        /// A random <see cref="uint"/> value.
+        /// </returns>
+        public static uint RandomGroupOrInstanceId()
+        {
+            Span<byte> buffer = stackalloc byte[sizeof(uint)];
+
+            Random.Shared.NextBytes(buffer);
+
+            return MemoryMarshal.Read<uint>(buffer);
+        }
 
         /// <inheritdoc/>
         public override bool Equals([NotNullWhen(true)] object? obj)
