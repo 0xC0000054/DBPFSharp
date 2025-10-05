@@ -44,12 +44,6 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
                 _ => throw new DBPFException($"Unknown {nameof(ExemplarPropertyKeyType)} value."),
             };
 
-            if (repCount == 0)
-            {
-                // A repetition count of zero is treated as an array with one item.
-                repCount = 1;
-            }
-
             return new BinaryHeaderData(propertyID, dataType, repCount);
         }
 
