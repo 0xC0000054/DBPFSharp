@@ -44,7 +44,6 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// </value>
         public string Value { get; }
 
-
         [SkipLocalsInit]
         private protected override void EncodeBinaryData(BinaryWriter writer)
         {
@@ -54,16 +53,19 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
             // equal to the string length in bytes.
             int bytesNeeded = this.RepCount;
 
-            Span<byte> buffer = bytesNeeded <= MaxStackLimit ? stackalloc byte[bytesNeeded] : new byte[bytesNeeded];
-
-            int bytesWritten = Encoding.ASCII.GetBytes(this.Value, buffer);
-
-            if (bytesWritten != bytesNeeded)
+            if (bytesNeeded > 0)
             {
-                throw new InvalidOperationException("Not all of the string data was written to the buffer.");
-            }
+                Span<byte> buffer = bytesNeeded <= MaxStackLimit ? stackalloc byte[bytesNeeded] : new byte[bytesNeeded];
 
-            writer.Write(buffer);
+                int bytesWritten = Encoding.ASCII.GetBytes(this.Value, buffer);
+
+                if (bytesWritten != bytesNeeded)
+                {
+                    throw new InvalidOperationException("Not all of the string data was written to the buffer.");
+                }
+
+                writer.Write(buffer);
+            }
         }
 
         [SkipLocalsInit]
@@ -71,11 +73,18 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         {
             const int MaxStackLimit = 256;
 
-            Span<byte> buffer = repCount <= MaxStackLimit ? stackalloc byte[repCount] : new byte[repCount];
+            string value = string.Empty;
 
-            reader.BaseStream.ReadExactly(buffer);
+            if (repCount > 0)
+            {
+                Span<byte> buffer = repCount <= MaxStackLimit ? stackalloc byte[repCount] : new byte[repCount];
 
-            return Encoding.ASCII.GetString(buffer);
+                reader.BaseStream.ReadExactly(buffer);
+
+                value = Encoding.ASCII.GetString(buffer);
+            }
+
+            return value;
         }
     }
 }
