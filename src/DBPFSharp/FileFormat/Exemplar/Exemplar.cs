@@ -3,7 +3,6 @@
 
 using DBPFSharp.FileFormat.Exemplar.Properties;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 

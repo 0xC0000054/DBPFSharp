@@ -1,8 +1,6 @@
 ﻿// Copyright (c) 2023, 2025 Nicholas Hayes
 // SPDX-License-Identifier: MIT
 
-using System;
-
 namespace DBPFSharp.FileFormat
 {
     /// <summary>
