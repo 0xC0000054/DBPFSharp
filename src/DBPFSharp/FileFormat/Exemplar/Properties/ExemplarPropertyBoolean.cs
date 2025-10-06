@@ -64,18 +64,21 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         {
             const int MaxStackLimit = 256;
 
-            IReadOnlyList<bool> values = this.Values;
+            ReadOnlyCollection<bool> values = this.Values;
 
             int count = values.Count;
 
-            Span<byte> buffer = count <= MaxStackLimit ? stackalloc byte[count] : new byte[count];
-
-            for (int i = 0; i < count; i++)
+            if (count > 0)
             {
-                buffer[i] = (byte)(values[i] ? 1 : 0);
-            }
+                Span<byte> buffer = count <= MaxStackLimit ? stackalloc byte[count] : new byte[count];
 
-            writer.Write(buffer);
+                for (int i = 0; i < count; i++)
+                {
+                    buffer[i] = (byte)(values[i] ? 1 : 0);
+                }
+
+                writer.Write(buffer);
+            }
         }
 
         private static ReadOnlyCollection<bool> Decode(BinaryReader reader, int repCount)
