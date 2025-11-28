@@ -52,7 +52,7 @@ namespace DBPFSharp
         /// This is an optimization to skip compression for very small files.
         /// The QFS format used by SC4 has a 9 byte header.
         /// </remarks>
-        private const int UncompressedDataMinSize = 10;
+        private const int UncompressedDataMinSize = 50;
 
         /// <summary>
         /// The maximum size in bytes of an uncompressed buffer that can be compressed with QFS compression.
