@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2023, 2025 Nicholas Hayes
+﻿// Copyright (c) 2023, 2025, 2026 Nicholas Hayes
 // SPDX-License-Identifier: MIT
 
 namespace DBPFSharp.FileFormat
