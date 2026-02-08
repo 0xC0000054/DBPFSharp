@@ -181,7 +181,7 @@ namespace DBPFSharp
         /// </summary>
         public uint HoleIndexSize { get; }
 
-        private static ReadOnlySpan<byte> DBPFSignature => new byte[] { (byte)'D', (byte)'B', (byte)'P', (byte)'F' };
+        private static ReadOnlySpan<byte> DBPFSignature => "DBPF"u8;
 
         /// <summary>
         /// Saves the <see cref="DBPFHeader"/>.
