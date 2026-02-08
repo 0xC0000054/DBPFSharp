@@ -9,10 +9,6 @@ namespace ResourceParsing
 {
     internal class Program
     {
-        private const uint CohortTypeID = 0x05342861;
-        private const uint ExemplarTypeID = 0x6534284A;
-        private const uint LTEXTTypeID = 0x2026960B;
-
         static void Main(string[] args)
         {
             if (args.Length != 1)
@@ -29,7 +25,7 @@ namespace ResourceParsing
                 {
                     var index = file.Index;
 
-                    DBPFIndexEntry? exemplarEntry = index.FirstOrDefault(i => i.Type is CohortTypeID or ExemplarTypeID);
+                    DBPFIndexEntry? exemplarEntry = index.FirstOrDefault(i => i.Type is SC4TypeIds.Cohort or SC4TypeIds.Exemplar);
 
                     if (exemplarEntry != null)
                     {
@@ -40,7 +36,7 @@ namespace ResourceParsing
                         Console.WriteLine("{0} does not contain any cohort or exemplar records.");
                     }
 
-                    DBPFIndexEntry? ltextEntry = index.FirstOrDefault(i => i.Type is LTEXTTypeID);
+                    DBPFIndexEntry? ltextEntry = index.FirstOrDefault(i => i.Type is SC4TypeIds.LTEXT);
 
                     if (ltextEntry != null)
                     {
@@ -60,7 +56,7 @@ namespace ResourceParsing
 
         public static void ParseExemplar(DBPFFile file, DBPFIndexEntry indexEntry)
         {
-            if (indexEntry.Type is not CohortTypeID and not ExemplarTypeID)
+            if (indexEntry.Type is not SC4TypeIds.Cohort and not SC4TypeIds.Exemplar)
             {
                 Console.WriteLine("0x{0:X8}, 0x{1:X8}, 0x{2:X8} is not a cohort or exemplar.",
                                   indexEntry.Type,
@@ -98,7 +94,7 @@ namespace ResourceParsing
 
         public static void ParseLTEXT(DBPFFile file, DBPFIndexEntry indexEntry)
         {
-            if (indexEntry.Type is not LTEXTTypeID)
+            if (indexEntry.Type is not SC4TypeIds.LTEXT)
             {
                 Console.WriteLine("0x{0:X8}, 0x{1:X8}, 0x{2:X8} is not a LTEXT.",
                                   indexEntry.Type,
