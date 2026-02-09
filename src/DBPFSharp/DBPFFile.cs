@@ -473,7 +473,7 @@ namespace DBPFSharp
                         default:
                             // Unknown entry state or deleted file.
 #if DEBUG
-                            System.Diagnostics.Debug.WriteLine(string.Format("Index # {0} has unsupported state {0}.\n", i, state));
+                            System.Diagnostics.Debug.WriteLine(string.Format("Index # {0} has unsupported state {1}.\n", i, state));
 #endif
                             continue;
                     }
