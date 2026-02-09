@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Threading;
 
 namespace DBPFSharp
 {
@@ -14,6 +15,7 @@ namespace DBPFSharp
         private readonly byte[]? compressedData;
         private byte[]? uncompressedData;
         private readonly bool shouldBeCompressed;
+        private readonly Lock sync;
 
         private DBPFEntry(byte[]? compressedData, byte[]? uncompressedData, bool shouldBeCompressed = false)
         {
@@ -40,6 +42,7 @@ namespace DBPFSharp
 
             this.compressedData = compressedData;
             this.uncompressedData = uncompressedData;
+            this.sync = new Lock();
         }
 
         /// <summary>
@@ -87,22 +90,33 @@ namespace DBPFSharp
         /// <returns>
         ///   The uncompressed data.
         /// </returns>
-        public byte[] GetUncompressedData()
+        public byte[] GetUncompressedData() => GetUncompressedDataAsSpan().ToArray();
+
+        /// <summary>
+        /// Gets the uncompressed data as a <see cref="ReadOnlySpan{T}"/>.
+        /// </summary>
+        /// <returns>
+        /// The uncompressed data.
+        /// </returns>
+        public ReadOnlySpan<byte> GetUncompressedDataAsSpan()
         {
             if (this.uncompressedData is null)
             {
-                if (this.compressedData is null)
+                lock (this.sync)
                 {
-                    throw new InvalidOperationException("Both the compressed and uncompressed data are null.");
-                }
+                    if (this.uncompressedData is null)
+                    {
+                        if (this.compressedData is null)
+                        {
+                            throw new InvalidOperationException("Both the compressed and uncompressed data are null.");
+                        }
 
-                this.uncompressedData = QfsCompression.Decompress(this.compressedData);
+                        this.uncompressedData = QfsCompression.Decompress(this.compressedData);  
+                    }
+                }
             }
 
-            byte[] bytes = GC.AllocateUninitializedArray<byte>(this.uncompressedData!.Length);
-            this.uncompressedData.CopyTo(bytes, 0);
-
-            return bytes;
+            return this.uncompressedData;
         }
 
         internal (uint bytesWritten, bool isCompressed) Save(Stream stream)

@@ -2,20 +2,19 @@
 // SPDX-License-Identifier: MIT
 
 using System;
-using System.IO;
 
 namespace DBPFSharp.FileFormat.Exemplar.Properties
 {
     internal static class ExemplarPropertyFactory
     {
-        internal static ExemplarProperty Create(BinaryReader reader)
+        internal static ExemplarProperty CreateFromBinary(ref SpanBinaryReader reader)
         {
-            ExemplarPropertyHeader.BinaryHeaderData header = ExemplarPropertyHeader.ReadBinary(reader);
+            ExemplarPropertyHeader.BinaryHeaderData header = ExemplarPropertyHeader.ReadBinary(ref reader);
 
-            return CreateBinaryProperty(header.id, header.dataType, reader, header.count);
+            return CreateBinaryProperty(header.id, header.dataType, ref reader, header.count);
         }
 
-        internal static ExemplarProperty Create(ReadOnlySpan<char> line)
+        internal static ExemplarProperty CreateFromText(ReadOnlySpan<byte> line)
         {
             ExemplarPropertyHeader.TextHeaderData header = ExemplarPropertyHeader.ReadText(line);
 
@@ -24,38 +23,38 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
 
         private static ExemplarProperty CreateBinaryProperty(uint id,
                                                              ExemplarPropertyDataType dataType,
-                                                             BinaryReader reader,
+                                                             ref SpanBinaryReader reader,
                                                              int count)
         {
             return dataType switch
             {
-                ExemplarPropertyDataType.Boolean => new ExemplarPropertyBoolean(id, reader, count),
-                ExemplarPropertyDataType.UInt8 => new ExemplarPropertyUInt8(id, reader, count),
-                ExemplarPropertyDataType.UInt16 => new ExemplarPropertyUInt16(id, reader, count),
-                ExemplarPropertyDataType.UInt32 => new ExemplarPropertyUInt32(id, reader, count),
-                ExemplarPropertyDataType.SInt32 => new ExemplarPropertySInt32(id, reader, count),
-                ExemplarPropertyDataType.SInt64 => new ExemplarPropertySInt64(id, reader, count),
-                ExemplarPropertyDataType.Float32 => new ExemplarPropertyFloat32(id, reader, count),
-                ExemplarPropertyDataType.String => new ExemplarPropertyString(id, reader, count),
+                ExemplarPropertyDataType.Boolean => new ExemplarPropertyBoolean(id, ref reader, count),
+                ExemplarPropertyDataType.UInt8 => new ExemplarPropertyUInt8(id, ref reader, count),
+                ExemplarPropertyDataType.UInt16 => new ExemplarPropertyUInt16(id, ref reader, count),
+                ExemplarPropertyDataType.UInt32 => new ExemplarPropertyUInt32(id, ref reader, count),
+                ExemplarPropertyDataType.SInt32 => new ExemplarPropertySInt32(id, ref reader, count),
+                ExemplarPropertyDataType.SInt64 => new ExemplarPropertySInt64(id, ref reader, count),
+                ExemplarPropertyDataType.Float32 => new ExemplarPropertyFloat32(id, ref reader, count),
+                ExemplarPropertyDataType.String => new ExemplarPropertyString(id, ref reader, count),
                 _ => throw new InvalidOperationException($"Unsupported {nameof(ExemplarPropertyDataType)} value: {dataType}."),
             };
         }
 
         private static ExemplarProperty CreateTextProperty(uint id,
                                                            ExemplarPropertyDataType dataType,
-                                                           ReadOnlySpan<char> data,
+                                                           ReadOnlySpan<byte> data,
                                                            int count)
         {
             return dataType switch
             {
-                ExemplarPropertyDataType.Boolean => new ExemplarPropertyBoolean(id, TextExemplarUtil.ParseBooleanArray(data, count)),
-                ExemplarPropertyDataType.UInt8 => new ExemplarPropertyUInt8(id, TextExemplarUtil.ParseUInt8Array(data, count)),
-                ExemplarPropertyDataType.UInt16 => new ExemplarPropertyUInt16(id, TextExemplarUtil.ParseUInt16Array(data, count)),
-                ExemplarPropertyDataType.UInt32 => new ExemplarPropertyUInt32(id, TextExemplarUtil.ParseUInt32Array(data, count)),
-                ExemplarPropertyDataType.SInt32 => new ExemplarPropertySInt32(id, TextExemplarUtil.ParseSInt32Array(data, count)),
-                ExemplarPropertyDataType.SInt64 => new ExemplarPropertySInt64(id, TextExemplarUtil.ParseSInt64Array(data, count)),
-                ExemplarPropertyDataType.Float32 => new ExemplarPropertyFloat32(id, TextExemplarUtil.ParseFloat32Array(data, count)),
-                ExemplarPropertyDataType.String => new ExemplarPropertyString(id, TextExemplarUtil.ParseString(data)),
+                ExemplarPropertyDataType.Boolean => new ExemplarPropertyBoolean(id, data, count),
+                ExemplarPropertyDataType.UInt8 => new ExemplarPropertyUInt8(id, data, count),
+                ExemplarPropertyDataType.UInt16 => new ExemplarPropertyUInt16(id, data, count),
+                ExemplarPropertyDataType.UInt32 => new ExemplarPropertyUInt32(id, data, count),
+                ExemplarPropertyDataType.SInt32 => new ExemplarPropertySInt32(id, data, count),
+                ExemplarPropertyDataType.SInt64 => new ExemplarPropertySInt64(id, data, count),
+                ExemplarPropertyDataType.Float32 => new ExemplarPropertyFloat32(id, data, count),
+                ExemplarPropertyDataType.String => new ExemplarPropertyString(id, data),
                 _ => throw new InvalidOperationException($"Unsupported {nameof(ExemplarPropertyDataType)} value: {dataType}."),
             };
         }

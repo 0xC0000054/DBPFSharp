@@ -27,10 +27,16 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         }
 
         internal ExemplarPropertyString(uint id,
-                                        BinaryReader reader,
+                                        ReadOnlySpan<byte> asciiBytes) : base(id, asciiBytes.Length)
+        {
+            this.Value = Decode(asciiBytes);
+        }
+
+        internal ExemplarPropertyString(uint id,
+                                        ref SpanBinaryReader reader,
                                         int repCount) : base(id, repCount)
         {
-            this.Value = Decode(reader, repCount);
+            this.Value = Decode(reader.ReadBytes(repCount));
         }
 
         /// <inheritdoc/>
@@ -68,23 +74,9 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
             }
         }
 
-        [SkipLocalsInit]
-        private static string Decode(BinaryReader reader, int repCount)
+        private static string Decode(ReadOnlySpan<byte> buffer)
         {
-            const int MaxStackLimit = 256;
-
-            string value = string.Empty;
-
-            if (repCount > 0)
-            {
-                Span<byte> buffer = repCount <= MaxStackLimit ? stackalloc byte[repCount] : new byte[repCount];
-
-                reader.BaseStream.ReadExactly(buffer);
-
-                value = Encoding.ASCII.GetString(buffer);
-            }
-
-            return value;
+            return buffer.IsEmpty ? string.Empty : Encoding.ASCII.GetString(buffer);
         }
     }
 }

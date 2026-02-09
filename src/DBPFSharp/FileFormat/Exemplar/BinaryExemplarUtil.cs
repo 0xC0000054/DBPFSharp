@@ -7,7 +7,7 @@ namespace DBPFSharp.FileFormat.Exemplar
 {
     internal static class BinaryExemplarUtil
     {
-        public static TGI ReadTGI(BinaryReader reader)
+        public static TGI ReadTGI(ref SpanBinaryReader reader)
         {
             uint type = reader.ReadUInt32();
             uint group = reader.ReadUInt32();

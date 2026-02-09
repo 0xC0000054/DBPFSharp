@@ -42,10 +42,20 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         }
 
         internal ExemplarPropertyBoolean(uint id,
-                                         BinaryReader reader,
+                                         ReadOnlySpan<byte> text,
+                                         int expectedRepCount) : base(id)
+        {
+            List<bool> values = TextExemplarUtil.ParseBooleanArray(text, expectedRepCount);
+
+            this.Values = values.AsReadOnly();
+            this.RepCount = values.Count == 1 ? 0 : values.Count;
+        }
+
+        internal ExemplarPropertyBoolean(uint id,
+                                         ref SpanBinaryReader reader,
                                          int repCount) : base(id, repCount)
         {
-            this.Values = Decode(reader, repCount);
+            this.Values = Decode(ref reader, repCount);
         }
 
         /// <inheritdoc/>
@@ -81,7 +91,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
             }
         }
 
-        private static ReadOnlyCollection<bool> Decode(BinaryReader reader, int repCount)
+        private static ReadOnlyCollection<bool> Decode(ref SpanBinaryReader reader, int repCount)
         {
             bool[] values = new bool[repCount];
 

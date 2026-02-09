@@ -33,7 +33,7 @@ namespace ResourceParsing
                     }
                     else
                     {
-                        Console.WriteLine("{0} does not contain any cohort or exemplar records.");
+                        Console.WriteLine("{0} does not contain any cohort or exemplar records.", input);
                     }
 
                     DBPFIndexEntry? ltextEntry = index.FirstOrDefault(i => i.Type is SC4TypeIds.LTEXT);
@@ -44,7 +44,7 @@ namespace ResourceParsing
                     }
                     else
                     {
-                        Console.WriteLine("{0} does not contain any LTEXT records.");
+                        Console.WriteLine("{0} does not contain any LTEXT records.", input);
                     }
                 }
             }
@@ -68,7 +68,7 @@ namespace ResourceParsing
             try
             {
                 DBPFEntry entry = file.GetEntry(indexEntry);
-                byte[] data = entry.GetUncompressedData();
+                ReadOnlySpan<byte> data = entry.GetUncompressedDataAsSpan();
 
                 Exemplar exemplar = new(data);
 
@@ -106,7 +106,7 @@ namespace ResourceParsing
             try
             {
                 DBPFEntry entry = file.GetEntry(indexEntry);
-                byte[] data = entry.GetUncompressedData();
+                ReadOnlySpan<byte> data = entry.GetUncompressedDataAsSpan();
 
                 LTEXT ltext = new(data);
 

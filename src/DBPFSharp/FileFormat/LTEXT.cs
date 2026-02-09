@@ -43,6 +43,16 @@ namespace DBPFSharp.FileFormat
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="LTEXT"/> class.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        /// <exception cref="DBPFException">An error occurred when decoding the LTEXT data.</exception>
+        public LTEXT(ReadOnlySpan<byte> data)
+        {
+            this.Value = Decode(data);
+        }
+
+        /// <summary>
         /// Gets the value.
         /// </summary>
         /// <value>
@@ -92,9 +102,9 @@ namespace DBPFSharp.FileFormat
             }
         }
 
-        private static string Decode(ReadOnlyMemory<byte> data)
+        private static string Decode(ReadOnlySpan<byte> data)
         {
-            (int textLength, FileEncoding encoding) = Header.Read(data.Span);
+            (int textLength, FileEncoding encoding) = Header.Read(data);
 
             string result = string.Empty;
 
@@ -102,16 +112,17 @@ namespace DBPFSharp.FileFormat
             {
                 try
                 {
-                    ReadOnlyMemory<byte> text = data[Header.SizeOf..];
+                    ReadOnlySpan<byte> text = data[Header.SizeOf..];
+                    DecodeContext context = new(text, encoding);
 
-                    result = string.Create(textLength, (text, encoding), static (chars, state) =>
+                    result = string.Create(textLength, context, static (chars, state) =>
                     {
                         int decodedChars = state.encoding switch
                         {
                             // We treat the active Windows code page as US-ASCII.
-                            FileEncoding.ActiveCodePage => Encoding.ASCII.GetChars(state.text.Span, chars),
-                            FileEncoding.UTF8 => UTF8.Value.GetChars(state.text.Span, chars),
-                            FileEncoding.UTF16LE => UTF16LE.Value.GetChars(state.text.Span, chars),
+                            FileEncoding.ActiveCodePage => Encoding.ASCII.GetChars(state.text, chars),
+                            FileEncoding.UTF8 => UTF8.Value.GetChars(state.text, chars),
+                            FileEncoding.UTF16LE => UTF16LE.Value.GetChars(state.text, chars),
                             _ => throw new DBPFException($"Unsupported LTEXT encoding: 0x{(byte)state.encoding:X2}."),
                         };
 
@@ -128,6 +139,12 @@ namespace DBPFSharp.FileFormat
             }
 
             return result;
+        }
+
+        private readonly ref struct DecodeContext(ReadOnlySpan<byte> text, FileEncoding encoding)
+        {
+            public readonly ReadOnlySpan<byte> text = text;
+            public readonly FileEncoding encoding = encoding;
         }
 
         private enum FileEncoding : byte

@@ -41,10 +41,20 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         }
 
         internal ExemplarPropertyUInt8(uint id,
-                                       BinaryReader reader,
+                                       ReadOnlySpan<byte> text,
+                                       int expectedRepCount) : base(id)
+        {
+            List<byte> values = TextExemplarUtil.ParseUInt8Array(text, expectedRepCount);
+
+            this.Values = values.AsReadOnly();
+            this.RepCount = values.Count == 1 ? 0 : values.Count;
+        }
+
+        internal ExemplarPropertyUInt8(uint id,
+                                       ref SpanBinaryReader reader,
                                        int repCount) : base(id, repCount)
         {
-            this.Values = Array.AsReadOnly(reader.ReadBytes(repCount));
+            this.Values = Array.AsReadOnly(reader.ReadBytes(repCount).ToArray());
         }
 
         /// <inheritdoc/>

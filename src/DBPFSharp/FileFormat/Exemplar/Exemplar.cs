@@ -31,6 +31,20 @@ namespace DBPFSharp.FileFormat.Exemplar
         /// <exception cref="ArgumentNullException"><paramref name="data"/> is null.</exception>
         public Exemplar(byte[] data)
         {
+            ArgumentNullException.ThrowIfNull(data);
+
+            (TGI parentCohort, bool isCohort, ExemplarPropertyCollection properties) = Decode(data);
+            this.ParentCohort = parentCohort;
+            this.IsCohort = isCohort;
+            this.Properties = properties;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Exemplar"/> class.
+        /// </summary>
+        /// <param name="data">The data.</param>
+        public Exemplar(ReadOnlySpan<byte> data)
+        {
             (TGI parentCohort, bool isCohort, ExemplarPropertyCollection properties) = Decode(data);
             this.ParentCohort = parentCohort;
             this.IsCohort = isCohort;
@@ -75,7 +89,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             // Because the exemplar text format expects the property names to
             // be included, we currently only support writing the binary format.
 
-            byte[] bytes = Array.Empty<byte>();
+            byte[] bytes = [];
 
             using (MemoryStream stream = new())
             using (BinaryWriter writer = new(stream))
@@ -88,10 +102,9 @@ namespace DBPFSharp.FileFormat.Exemplar
             return bytes;
         }
 
-        private static (TGI parentCohort, bool isCohort, ExemplarPropertyCollection properties) Decode(byte[] bytes)
+        private static (TGI parentCohort, bool isCohort, ExemplarPropertyCollection properties) Decode(ReadOnlySpan<byte> bytes)
         {
-            ReadOnlySpan<byte> bytesAsSpan = bytes;
-            ReadOnlySpan<byte> signature = bytesAsSpan[..8];
+            ReadOnlySpan<byte> signature = bytes[..8];
 
             TGI parentCohort;
             bool isCohort;
@@ -102,29 +115,35 @@ namespace DBPFSharp.FileFormat.Exemplar
             {
                 isCohort = signature.SequenceEqual(CohortBinarySignature);
 
-                using (MemoryStream stream = new(bytes, 8, bytes.Length - 8, false))
-                using (BinaryReader reader = new(stream))
-                {
-                    (parentCohort, properties) = ParseBinaryExemplar(reader);
-                }
+                SpanBinaryReader reader = new(bytes[8..]);
+ 
+                (parentCohort, properties) = ParseBinaryExemplar(ref reader);
+                
             }
             else if (signature.SequenceEqual(ExemplarTextSignature)
                      || signature.SequenceEqual(CohortTextSignature))
             {
                 isCohort = signature.SequenceEqual(CohortTextSignature);
+                
+                byte firstNewLineCharacter = bytes[8];
+                int dataStartOffset = 9;
 
-                int firstNewLineIndex = bytesAsSpan.IndexOf((byte)'\n');
-
-                if (firstNewLineIndex == -1)
+                if (firstNewLineCharacter == (byte)'\r')
                 {
-                    throw new InvalidOperationException($"The {signature.ToString()} header must end with a new line.");
+                    // If we found '\r', consume any immediately following '\n'.
+                    if (dataStartOffset < bytes.Length && bytes[dataStartOffset] == (byte)'\n')
+                    {
+                        dataStartOffset++;
+                    }
+                }
+                else if (firstNewLineCharacter != (byte)'\n')
+                {
+                    throw new InvalidOperationException($"The text {(isCohort ? "cohort" : "exemplar")} header must end with a new line.");
                 }
 
-                using (MemoryStream stream = new(bytes, firstNewLineIndex + 1, bytes.Length - 1 - firstNewLineIndex, false))
-                using (StreamReader reader = new(stream))
-                {
-                    (parentCohort, properties) = ParseTextExemplar(reader);
-                }
+                SpanAsciiTextReader reader = new(bytes[dataStartOffset..]);
+                
+                (parentCohort, properties) = ParseTextExemplar(ref reader);
             }
             else
             {
@@ -134,9 +153,9 @@ namespace DBPFSharp.FileFormat.Exemplar
             return (parentCohort, isCohort, properties);
         }
 
-        private static (TGI parentCohort, ExemplarPropertyCollection properties) ParseBinaryExemplar(BinaryReader reader)
+        private static (TGI parentCohort, ExemplarPropertyCollection properties) ParseBinaryExemplar(ref SpanBinaryReader reader)
         {
-            TGI parentCohort = BinaryExemplarUtil.ReadTGI(reader);
+            TGI parentCohort = BinaryExemplarUtil.ReadTGI(ref reader);
             int propertyCount = reader.ReadInt32();
 
             ExemplarPropertyCollection properties = [];
@@ -147,7 +166,7 @@ namespace DBPFSharp.FileFormat.Exemplar
 
                 for (int i = 0; i < propertyCount; i++)
                 {
-                    ExemplarProperty property = ExemplarPropertyFactory.Create(reader);
+                    ExemplarProperty property = ExemplarPropertyFactory.CreateFromBinary(ref reader);
 
                     properties.TryAdd(property);
                 }
@@ -156,7 +175,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             return (parentCohort, properties);
         }
 
-        private static (TGI parentCohort, ExemplarPropertyCollection properties) ParseTextExemplar(StreamReader reader)
+        private static (TGI parentCohort, ExemplarPropertyCollection properties) ParseTextExemplar(ref SpanAsciiTextReader reader)
         {
             TGI parentCohort = TextExemplarUtil.ParseParentCohort(reader.ReadLine());
 
@@ -170,7 +189,7 @@ namespace DBPFSharp.FileFormat.Exemplar
 
                 for (int i = 0; i < propertyCount; i++)
                 {
-                    ExemplarProperty property = ExemplarPropertyFactory.Create(reader.ReadLine());
+                    ExemplarProperty property = ExemplarPropertyFactory.CreateFromText(reader.ReadLine());
 
                     properties.TryAdd(property);
                 }

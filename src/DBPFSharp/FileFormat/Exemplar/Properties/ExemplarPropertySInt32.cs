@@ -41,10 +41,20 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         }
 
         internal ExemplarPropertySInt32(uint id,
-                                        BinaryReader reader,
+                                        ReadOnlySpan<byte> text,
+                                        int expectedRepCount) : base(id)
+        {
+            List<int> values = TextExemplarUtil.ParseSInt32Array(text, expectedRepCount);
+
+            this.Values = values.AsReadOnly();
+            this.RepCount = values.Count == 1 ? 0 : values.Count;
+        }
+
+        internal ExemplarPropertySInt32(uint id,
+                                        ref SpanBinaryReader reader,
                                         int repCount) : base(id, repCount)
         {
-            this.Values = Decode(reader, repCount);
+            this.Values = Decode(ref reader, repCount);
         }
 
         /// <inheritdoc/>
@@ -66,7 +76,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
             }
         }
 
-        private static ReadOnlyCollection<int> Decode(BinaryReader reader, int repCount)
+        private static ReadOnlyCollection<int> Decode(ref SpanBinaryReader reader, int repCount)
         {
             int[] values = new int[repCount];
 

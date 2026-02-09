@@ -2,32 +2,32 @@
 // SPDX-License-Identifier: MIT
 
 using System;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 
 namespace DBPFSharp.FileFormat.Exemplar
 {
     internal static class TextExemplarUtil
     {
-        private const char ArrayDelimiter = ',';
+        private const byte ArrayDelimiter = (byte)',';
 
-        internal static TGI ParseParentCohort(ReadOnlySpan<char> line)
+        internal static TGI ParseParentCohort(ReadOnlySpan<byte> line)
         {
-            const string Prefix = "ParentCohort=Key:{";
-            const string Suffix = "}";
+            ReadOnlySpan<byte> Prefix = "ParentCohort=Key:{"u8;
+            ReadOnlySpan<byte> Suffix = "}"u8;
 
             if (!line.StartsWith(Prefix) || !line.EndsWith(Suffix))
             {
                 throw new DBPFException("Invalid text exemplar ParentCohort property.");
             }
 
-            ReadOnlySpan<char> data = line.Slice(Prefix.Length, line.Length - Prefix.Length - 1);
+            ReadOnlySpan<byte> data = line.Slice(Prefix.Length, line.Length - Prefix.Length - 1);
 
             Span<Range> ranges = stackalloc Range[3];
 
-            int count = data.Split(ranges, ArrayDelimiter);
-
-            if (count != 3)
+            if (!Split(data, ArrayDelimiter, ranges))
             {
                 throw new DBPFException("Invalid text exemplar ParentCohort property.");
             }
@@ -41,9 +41,9 @@ namespace DBPFSharp.FileFormat.Exemplar
             return new TGI(type, group, instance);
         }
 
-        internal static int ParsePropertyCount(ReadOnlySpan<char> line)
+        internal static int ParsePropertyCount(ReadOnlySpan<byte> line)
         {
-            const string Prefix = "PropCount=";
+            ReadOnlySpan<byte> Prefix = "PropCount="u8;
 
             if (!line.StartsWith(Prefix))
             {
@@ -53,7 +53,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             return ParseHexNumberSInt32(line[Prefix.Length..]);
         }
 
-        internal static List<bool> ParseBooleanArray(ReadOnlySpan<char> span, int count)
+        internal static List<bool> ParseBooleanArray(ReadOnlySpan<byte> span, int count)
         {
             List<bool> result = new(count);
 
@@ -79,7 +79,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             return result;
         }
 
-        internal static List<float> ParseFloat32Array(ReadOnlySpan<char> span, int count)
+        internal static List<float> ParseFloat32Array(ReadOnlySpan<byte> span, int count)
         {
             List<float> result = new(count);
 
@@ -105,7 +105,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             return result;
         }
 
-        internal static List<int> ParseSInt32Array(ReadOnlySpan<char> span, int count)
+        internal static List<int> ParseSInt32Array(ReadOnlySpan<byte> span, int count)
         {
             List<int> result = new(count);
 
@@ -131,7 +131,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             return result;
         }
 
-        internal static List<long> ParseSInt64Array(ReadOnlySpan<char> span, int count)
+        internal static List<long> ParseSInt64Array(ReadOnlySpan<byte> span, int count)
         {
             List<long> result = new(count);
 
@@ -157,7 +157,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             return result;
         }
 
-        internal static List<byte> ParseUInt8Array(ReadOnlySpan<char> span, int count)
+        internal static List<byte> ParseUInt8Array(ReadOnlySpan<byte> span, int count)
         {
             List<byte> result = new(count);
 
@@ -183,7 +183,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             return result;
         }
 
-        internal static List<ushort> ParseUInt16Array(ReadOnlySpan<char> span, int count)
+        internal static List<ushort> ParseUInt16Array(ReadOnlySpan<byte> span, int count)
         {
             List<ushort> result = new(count);
 
@@ -209,7 +209,7 @@ namespace DBPFSharp.FileFormat.Exemplar
             return result;
         }
 
-        internal static List<uint> ParseUInt32Array(ReadOnlySpan<char> span, int count)
+        internal static List<uint> ParseUInt32Array(ReadOnlySpan<byte> span, int count)
         {
             List<uint> result = new(count);
 
@@ -235,60 +235,87 @@ namespace DBPFSharp.FileFormat.Exemplar
             return result;
         }
 
-        internal static bool ParseBoolean(ReadOnlySpan<char> span)
+        internal static bool ParseBoolean(ReadOnlySpan<byte> span)
         {
-            return bool.Parse(span);
+            if (!Utf8Parser.TryParse(span, out bool value, out int _))
+            {
+                throw new FormatException($"Failed to parse the text exemplar value {Encoding.ASCII.GetString(span)} as a Boolean.");
+            }
+
+            return value;
         }
 
-        internal static float ParseFloat32(ReadOnlySpan<char> span)
+        internal static float ParseFloat32(ReadOnlySpan<byte> span)
         {
             return float.Parse(span,
                                NumberStyles.AllowThousands | NumberStyles.Float,
                                CultureInfo.InvariantCulture);
         }
 
-        internal static int ParseHexNumberSInt32(ReadOnlySpan<char> span)
+        internal static int ParseHexNumberSInt32(ReadOnlySpan<byte> span)
         {
             return int.Parse(StripHexPrefix(span),
                              NumberStyles.HexNumber,
                              CultureInfo.InvariantCulture);
         }
 
-        internal static long ParseHexNumberSInt64(ReadOnlySpan<char> span)
+        internal static long ParseHexNumberSInt64(ReadOnlySpan<byte> span)
         {
             return long.Parse(StripHexPrefix(span),
                               NumberStyles.HexNumber,
                               CultureInfo.InvariantCulture);
         }
 
-        internal static byte ParseHexNumberUInt8(ReadOnlySpan<char> span)
+        internal static byte ParseHexNumberUInt8(ReadOnlySpan<byte> span)
         {
             return byte.Parse(StripHexPrefix(span),
                               NumberStyles.HexNumber,
                               CultureInfo.InvariantCulture);
         }
-        internal static ushort ParseHexNumberUInt16(ReadOnlySpan<char> span)
+        internal static ushort ParseHexNumberUInt16(ReadOnlySpan<byte> span)
         {
             return ushort.Parse(StripHexPrefix(span),
                                 NumberStyles.HexNumber,
                                 CultureInfo.InvariantCulture);
         }
 
-        internal static uint ParseHexNumberUInt32(ReadOnlySpan<char> span)
+        internal static uint ParseHexNumberUInt32(ReadOnlySpan<byte> span)
         {
             return uint.Parse(StripHexPrefix(span),
                               NumberStyles.HexNumber,
                               CultureInfo.InvariantCulture);
         }
 
-        internal static string ParseString(ReadOnlySpan<char> span)
+        internal static bool Split(ReadOnlySpan<byte> source, byte separator, Span<Range> destination)
         {
-            return span.Trim('"').ToString();
+            int index = 0;
+
+            foreach (Range range in source.Split(separator))
+            {
+                if (index >= destination.Length)
+                {
+                    return false;
+                }
+
+                destination[index++] = range;
+            }
+
+            return index == destination.Length;
         }
 
-        private static ReadOnlySpan<char> StripHexPrefix(ReadOnlySpan<char> span)
+        private static ReadOnlySpan<byte> StripHexPrefix(ReadOnlySpan<byte> span)
         {
-            return span.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? span[2..] : span;
+            ReadOnlySpan<byte> result = span;
+
+            if (span.Length > 2 && span[0] == (byte)'0')
+            {
+                if (span[1] is ((byte)'x') or ((byte)'X'))
+                {
+                    result = span[2..];
+                }
+            }
+
+            return result;
         }
     }
 }
