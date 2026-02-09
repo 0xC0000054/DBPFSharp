@@ -28,8 +28,8 @@ namespace DBPFSharp
         public DBPFFile()
         {
             this.Header = new DBPFHeader();
-            this.indices = new DBPFIndexCollection();
-            this.compressionDirectory = new CompressionDirectory();
+            this.indices = [];
+            this.compressionDirectory = [];
             this.FileName = null;
             this.IsDirty = false;
             this.stream = null;
@@ -64,7 +64,7 @@ namespace DBPFSharp
                 int entryCount = checked((int)this.Header.Entries);
 
                 this.indices = new DBPFIndexCollection(entryCount);
-                this.compressionDirectory = new CompressionDirectory();
+                this.compressionDirectory = [];
 
                 this.stream.Seek(this.Header.IndexLocation, SeekOrigin.Begin);
 
@@ -416,7 +416,7 @@ namespace DBPFSharp
                 TrimDeletedItems();
 
                 DBPFIndexCollection saveIndices = new(this.indices.Count + 2);
-                CompressionDirectory compDirs = new();
+                CompressionDirectory compDirs = [];
                 long location = 0;
                 uint size = 0;
 
