@@ -250,13 +250,8 @@ namespace DBPFSharp
             if (!this.disposed)
             {
                 this.disposed = true;
-
-                if (this.stream != null)
-                {
-                    this.stream.Dispose();
-                    this.stream = null;
-                }
-
+                this.stream?.Dispose();
+                this.stream = null;
                 this.FileName = null;
             }
         }
@@ -595,10 +590,7 @@ namespace DBPFSharp
 
         private void VerifyNotDisposed()
         {
-            if (this.disposed)
-            {
-                throw new ObjectDisposedException(nameof(DBPFFile));
-            }
+            ObjectDisposedException.ThrowIf(this.disposed, nameof(DBPFFile));
         }
     }
 }

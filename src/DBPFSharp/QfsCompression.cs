@@ -79,7 +79,7 @@ namespace DBPFSharp
         {
             ArgumentNullException.ThrowIfNull(input);
 
-            if (input.Length < UncompressedDataMinSize || input.Length > UncompressedDataMaxSize)
+            if (input.Length is < UncompressedDataMinSize or > UncompressedDataMaxSize)
             {
                 return null;
             }
