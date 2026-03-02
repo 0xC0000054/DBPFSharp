@@ -104,7 +104,7 @@ namespace DBPFSharp.FileFormat
 
         private static string Decode(ReadOnlySpan<byte> data)
         {
-            (int textLength, FileEncoding encoding) = Header.Read(data);
+            (int textLength, FileEncoding encoding, int dataStartOffset) = Header.Read(data);
 
             string result = string.Empty;
 
@@ -112,7 +112,7 @@ namespace DBPFSharp.FileFormat
             {
                 try
                 {
-                    ReadOnlySpan<byte> text = data[Header.SizeOf..];
+                    ReadOnlySpan<byte> text = data[dataStartOffset..];
                     DecodeContext context = new(text, encoding);
 
                     result = string.Create(textLength, context, static (chars, state) =>
@@ -183,21 +183,44 @@ namespace DBPFSharp.FileFormat
             /// <param name="bytes">The LTEXT record bytes.</param>
             /// <returns>The decoded header data.</returns>
             /// <exception cref="DBPFException">The LTEXT file is invalid.</exception>
-            internal static (int textLength, FileEncoding encoding) Read(ReadOnlySpan<byte> bytes)
+            internal static (int textLength, FileEncoding encoding, int dataStartOffset) Read(ReadOnlySpan<byte> bytes)
             {
+                int textLength;
+                FileEncoding fileEncoding;
+                int dataStartOffset;
+
                 if (bytes.Length < SizeOf)
                 {
-                    throw new DBPFException("The LTEXT file is invalid.");
+                    textLength = bytes.Length;
+                    fileEncoding = FileEncoding.UTF8;
+                    dataStartOffset = 0;
                 }
+                else
+                {
+                    // The LTEXT header is a packed little endian UInt32 value.
+                    // The text length is stored in the bottom 3 bytes as a little endian UInt24, with
+                    // the upper byte containing the encoding.
 
-                // The LTEXT header is a packed little endian UInt32 value.
-                // The text length is stored in the bottom 3 bytes as a little endian UInt24, with
-                // the upper byte containing the encoding.
+                    FileEncoding encoding = (FileEncoding)bytes[3];
 
-                int textLength = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16);
-                FileEncoding encoding = (FileEncoding)bytes[3];
-
-                return (textLength, encoding);
+                    switch (encoding)
+                    {
+                        case FileEncoding.ActiveCodePage:
+                        case FileEncoding.UTF8:
+                        case FileEncoding.UTF16LE:
+                            textLength = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16);
+                            fileEncoding = encoding;
+                            dataStartOffset = SizeOf;
+                            break;
+                        default:
+                            textLength = bytes.Length;
+                            fileEncoding = FileEncoding.UTF8;
+                            dataStartOffset = 0;
+                            break;
+                    }
+                }
+                
+                return (textLength, fileEncoding, dataStartOffset);
             }
 
             /// <summary>
