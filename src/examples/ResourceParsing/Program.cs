@@ -25,7 +25,7 @@ namespace ResourceParsing
                 {
                     var index = file.Index;
 
-                    DBPFIndexEntry? exemplarEntry = index.FirstOrDefault(i => i.Type is SC4TypeIds.Cohort or SC4TypeIds.Exemplar);
+                    DBPFIndexEntry? exemplarEntry = index.FirstOrDefault(i => i.Type is SC4TypeIds.Exemplar);
 
                     if (exemplarEntry != null)
                     {
@@ -56,9 +56,9 @@ namespace ResourceParsing
 
         public static void ParseExemplar(DBPFFile file, DBPFIndexEntry indexEntry)
         {
-            if (indexEntry.Type is not SC4TypeIds.Cohort and not SC4TypeIds.Exemplar)
+            if (indexEntry.Type is not SC4TypeIds.Exemplar)
             {
-                Console.WriteLine("0x{0:X8}, 0x{1:X8}, 0x{2:X8} is not a cohort or exemplar.",
+                Console.WriteLine("0x{0:X8}, 0x{1:X8}, 0x{2:X8} is not an exemplar.",
                                   indexEntry.Type,
                                   indexEntry.Group,
                                   indexEntry.Instance);
@@ -72,10 +72,7 @@ namespace ResourceParsing
 
                 Exemplar exemplar = new(data);
 
-                string type = exemplar.IsCohort ? "Cohort" : "Exemplar";
-
-                Console.WriteLine("{0} 0x{1:X8}, 0x{2:X8}, 0x{3:X8} has {4} properties.",
-                                  type,
+                Console.WriteLine("Exemplar 0x{0:X8}, 0x{1:X8}, 0x{2:X8} has {3} properties.",
                                   indexEntry.Type,
                                   indexEntry.Group,
                                   indexEntry.Instance,
