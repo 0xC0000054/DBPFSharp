@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 
 namespace DBPFSharp.FileFormat.Exemplar.Properties
@@ -12,6 +13,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
     /// An exemplar property class for 32-bit floating point values.
     /// </summary>
     /// <seealso cref="ExemplarProperty" />
+    [DebuggerDisplay("{DebuggerDisplay}")]
     public sealed class ExemplarPropertyFloat32 : ExemplarProperty
     {
         /// <summary>
@@ -67,6 +69,9 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// The property values.
         /// </value>
         public ReadOnlyCollection<float> Values { get; }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string DebuggerDisplay => $"Id: 0x{this.Id:X8} Values: {this.PropertyDataType}[{this.Values.Count}]";
 
         private protected override void EncodeBinaryData(BinaryWriter writer)
         {

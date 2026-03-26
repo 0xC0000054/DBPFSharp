@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 
@@ -13,6 +14,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
     /// An exemplar property class for Boolean values.
     /// </summary>
     /// <seealso cref="ExemplarProperty" />
+    [DebuggerDisplay("{DebuggerDisplay}")]
     public sealed class ExemplarPropertyBoolean : ExemplarProperty
     {
         /// <summary>
@@ -68,6 +70,9 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// The property values.
         /// </value>
         public ReadOnlyCollection<bool> Values { get; }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string DebuggerDisplay => $"Id: 0x{this.Id:X8} Values: {this.PropertyDataType}[{this.Values.Count}]";
 
         [SkipLocalsInit]
         private protected override void EncodeBinaryData(BinaryWriter writer)

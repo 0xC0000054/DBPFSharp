@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -12,6 +13,7 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
     /// An exemplar property class for strings.
     /// </summary>
     /// <seealso cref="ExemplarProperty" />
+    [DebuggerDisplay("{DebuggerDisplay}")]
     public sealed class ExemplarPropertyString : ExemplarProperty
     {
         /// <summary>
@@ -49,6 +51,9 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
         /// The property value.
         /// </value>
         public string Value { get; }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private string DebuggerDisplay => $"Id: 0x{this.Id:X8} Value: {this.Value}";
 
         [SkipLocalsInit]
         private protected override void EncodeBinaryData(BinaryWriter writer)

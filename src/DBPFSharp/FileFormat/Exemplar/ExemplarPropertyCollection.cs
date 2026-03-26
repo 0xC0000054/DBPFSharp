@@ -5,6 +5,7 @@ using DBPFSharp.FileFormat.Exemplar.Properties;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace DBPFSharp.FileFormat.Exemplar
@@ -12,6 +13,7 @@ namespace DBPFSharp.FileFormat.Exemplar
     /// <summary>
     /// Represents a collection of exemplar properties.
     /// </summary>
+    [DebuggerTypeProxy(typeof(ExemplarPropertyCollectionDebugView))]
     public sealed class ExemplarPropertyCollection : IEnumerable<ExemplarProperty>
     {
         private readonly SortedList<uint, ExemplarProperty> properties;
@@ -164,6 +166,32 @@ namespace DBPFSharp.FileFormat.Exemplar
 
             /// <inheritdoc />
             public void Reset() => this.enumerator.Reset();
+        }
+
+        private sealed class ExemplarPropertyCollectionDebugView
+        {
+            private readonly ExemplarPropertyCollection collection;
+
+            public ExemplarPropertyCollectionDebugView(ExemplarPropertyCollection collection)
+            {
+                this.collection = collection;
+            }
+
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            public ExemplarProperty[] Items
+            {
+                get
+                {
+                    ExemplarProperty[] properties = new ExemplarProperty[this.collection.Count];
+
+                    for (int i = 0; i < properties.Length; i++)
+                    {
+                        properties[i] = this.collection.properties.GetValueAtIndex(i);
+                    }
+
+                    return properties;
+                }
+            }
         }
     }
 }
