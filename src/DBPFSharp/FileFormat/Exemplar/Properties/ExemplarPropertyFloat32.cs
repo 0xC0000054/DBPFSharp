@@ -83,11 +83,11 @@ namespace DBPFSharp.FileFormat.Exemplar.Properties
 
         private static ReadOnlyCollection<float> Decode(ref SpanBinaryReader reader, int repCount)
         {
-            List<float> values = new(repCount);
+            float[] values = new float[repCount];
 
             for (int i = 0; i < repCount; i++)
             {
-                values.Add(reader.ReadSingle());
+                values[i] = reader.ReadSingle();
             }
 
             return values.AsReadOnly();
