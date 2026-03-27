@@ -16,9 +16,8 @@ namespace DBPFSharp.FileFormat.Exemplar
         internal static TGI ParseParentCohort(ReadOnlySpan<byte> line)
         {
             ReadOnlySpan<byte> Prefix = "ParentCohort=Key:{"u8;
-            ReadOnlySpan<byte> Suffix = "}"u8;
 
-            if (!line.StartsWith(Prefix) || !line.EndsWith(Suffix))
+            if (!line.StartsWith(Prefix) || !line.EndsWith((byte)'}'))
             {
                 throw new DBPFException("Invalid text exemplar ParentCohort property.");
             }
